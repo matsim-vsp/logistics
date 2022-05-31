@@ -200,7 +200,7 @@ import lsp.LSPResource;
 		
 		//The distribution adapter i.e. the Resource is created
 		Id<LSPResource> distributionAdapterId = Id.create("DistributionCarrierAdapter", LSPResource.class);
-		UsecaseUtils.DistributionCarrierAdapterBuilder distributionAdapterBuilder = UsecaseUtils.DistributionCarrierAdapterBuilder.newInstance(distributionAdapterId, network);
+		UsecaseUtils.DistributionCarrierResourceBuilder distributionAdapterBuilder = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(distributionAdapterId, network );
 		distributionAdapterBuilder.setCarrier(distributionCarrier);
 		distributionAdapterBuilder.setLocationLinkId(distributionLinkId);
 		

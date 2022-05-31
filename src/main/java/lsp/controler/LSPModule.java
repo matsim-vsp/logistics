@@ -22,13 +22,11 @@ package lsp.controler;
 
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import lsp.LSPs;
+import lsp.scoring.LSPScoringModuleDefaultImpl;
 import org.apache.log4j.Logger;
 import org.matsim.contrib.freight.controler.CarrierAgentTracker;
 import org.matsim.contrib.freight.controler.LSPAgentSource;
 import org.matsim.contrib.freight.events.eventsCreator.LSPEventCreator;
-import lsp.replanning.LSPReplanningModule;
-import lsp.scoring.LSPScoringModule;
 import org.matsim.contrib.freight.FreightConfigGroup;
 import org.matsim.contrib.freight.events.eventsCreator.LSPEventCreatorUtils;
 import org.matsim.core.config.ConfigUtils;
@@ -54,6 +52,7 @@ public class LSPModule extends AbstractModule {
 
 		bind( LSPControlerListenerImpl.class ).in( Singleton.class );
 		addControlerListenerBinding().to( LSPControlerListenerImpl.class );
+		addControlerListenerBinding().to( LSPScoringModuleDefaultImpl.class );
 
 		// this switches on certain qsim components:
 		QSimComponentsConfigGroup qsimComponents = ConfigUtils.addOrGetModule( getConfig(), QSimComponentsConfigGroup.class );

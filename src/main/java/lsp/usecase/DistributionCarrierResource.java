@@ -48,7 +48,7 @@ import org.matsim.utils.objectattributes.attributable.Attributes;
 	private final Collection<EventHandler> eventHandlers;
 	private final Collection<LSPSimulationTracker> trackers;
 
-	DistributionCarrierResource( UsecaseUtils.DistributionCarrierAdapterBuilder builder ){
+	DistributionCarrierResource( UsecaseUtils.DistributionCarrierResourceBuilder builder ){
 			this.id = builder.id;
 		Id<Link> locationLinkId = builder.locationLinkId;
 			this.distributionHandler = builder.distributionHandler;

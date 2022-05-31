@@ -191,7 +191,6 @@ import lsp.LSPResourceScheduler;
 				break;
 			}
 		}
-		
 	}
 	
 	private void addCollectionTourEndEventHandler( CarrierService carrierService, ShipmentWithTime tuple, LSPCarrierResource resource ){

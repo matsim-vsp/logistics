@@ -24,7 +24,7 @@ import lsp.*;
 import lsp.controler.LSPModule;
 import lsp.replanning.LSPReplanningModule;
 import lsp.replanning.LSPReplanningModuleImpl;
-import lsp.scoring.LSPScoringModule;
+import lsp.scoring.LSPScoringListener;
 import lsp.scoring.LSPScoringModuleDefaultImpl;
 import lsp.shipment.LSPShipment;
 import lsp.shipment.ShipmentPlanElement;
@@ -202,7 +202,7 @@ public class RepeatedMultipleShipmentsCompleteLSPMobsimTest {
 		
 		
 		Id<LSPResource> distributionAdapterId = Id.create("DistributionCarrierAdapter", LSPResource.class);
-		UsecaseUtils.DistributionCarrierAdapterBuilder distributionAdapterBuilder = UsecaseUtils.DistributionCarrierAdapterBuilder.newInstance(distributionAdapterId, network);
+		UsecaseUtils.DistributionCarrierResourceBuilder distributionAdapterBuilder = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(distributionAdapterId, network );
 		distributionAdapterBuilder.setDistributionScheduler(UsecaseUtils.createDefaultDistributionCarrierScheduler());
 		distributionAdapterBuilder.setCarrier(carrier);
 		distributionAdapterBuilder.setLocationLinkId(distributionLinkId);
@@ -306,7 +306,7 @@ public class RepeatedMultipleShipmentsCompleteLSPMobsimTest {
 			@Override public void install(){
 				install( new LSPModule() );
 				this.bind( LSPReplanningModule.class ).to( LSPReplanningModuleImpl.class );
-				this.bind( LSPScoringModule.class ).to( LSPScoringModuleDefaultImpl.class );
+				this.bind( LSPScoringListener.class ).to( LSPScoringModuleDefaultImpl.class );
 			}
 		});
 		config.controler().setFirstIteration(0);

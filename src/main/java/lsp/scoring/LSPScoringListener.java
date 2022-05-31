@@ -18,31 +18,11 @@
  *  * ***********************************************************************
  */
 
-package lsp;
+package lsp.scoring;
 
-import lsp.shipment.LSPShipment;
-import org.matsim.api.core.v01.Identifiable;
-import org.matsim.utils.objectattributes.attributable.Attributable;
+import org.matsim.core.controler.events.ScoringEvent;
+import org.matsim.core.controler.listener.ScoringListener;
 
-import java.util.Collection;
-
-
-/**
- * A LogisticsSolution can be seen as a representative of a
- * transport chain. It consists of several chain links that implement the interface
- * {@link LogisticsSolutionElement}. The latter is more a logical than a physical entity.
- * Physical entities, in turn, are housed inside classes that implement the interface
- * {@link LSPResource}. This introduction of an intermediate layer allows physical Resources
- * to be used by several {@link LogisticsSolution}s and thus transport chains.
- */
-public interface LogisticsSolution extends Identifiable<LogisticsSolution>, KnowsLSP, /* HasEventHandlers, */ HasSimulationTrackers, Attributable{
-
-	Collection<LogisticsSolutionElement> getSolutionElements();
-
-	Collection<LSPShipment> getShipments();
-
-	void assignShipment(LSPShipment shipment);
-
-	//    void setEventsManager(EventsManager eventsManager);
+public interface LSPScoringListener extends ScoringListener{
 
 }

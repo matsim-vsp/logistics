@@ -95,7 +95,7 @@ public class UsecaseUtils {
 		}
 
 
-	public static class DistributionCarrierAdapterBuilder {
+	public static class DistributionCarrierResourceBuilder{
 
 		final Id<LSPResource>id;
 		Carrier carrier;
@@ -104,28 +104,28 @@ public class UsecaseUtils {
 		DistributionCarrierScheduler distributionHandler;
 		final Network network;
 
-			public static DistributionCarrierAdapterBuilder newInstance(Id<LSPResource> id, Network network){
-				return new DistributionCarrierAdapterBuilder(id,network);
+			public static DistributionCarrierResourceBuilder newInstance( Id<LSPResource> id, Network network ){
+				return new DistributionCarrierResourceBuilder(id,network);
 			}
 
-			private DistributionCarrierAdapterBuilder(Id<LSPResource> id, Network network){
+			private DistributionCarrierResourceBuilder( Id<LSPResource> id, Network network ){
 				this.id = id;
 				this.clientElements = new ArrayList<>();
 				this.network = network;
 			}
 
-			public DistributionCarrierAdapterBuilder setLocationLinkId(Id<Link> locationLinkId){
+			public DistributionCarrierResourceBuilder setLocationLinkId( Id<Link> locationLinkId ){
 				this.locationLinkId = locationLinkId;
 				return this;
 			}
 
-			public DistributionCarrierAdapterBuilder setCarrier(Carrier carrier){
+			public DistributionCarrierResourceBuilder setCarrier( Carrier carrier ){
 				this.carrier = carrier;
 				return this;
 			}
 
 
-			public DistributionCarrierAdapterBuilder setDistributionScheduler(DistributionCarrierScheduler distributionCarrierScheduler){
+			public DistributionCarrierResourceBuilder setDistributionScheduler( DistributionCarrierScheduler distributionCarrierScheduler ){
 				this.distributionHandler = distributionCarrierScheduler;
 				return this;
 			}

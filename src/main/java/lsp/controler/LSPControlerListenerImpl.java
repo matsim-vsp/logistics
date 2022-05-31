@@ -24,7 +24,7 @@ package lsp.controler;
 import lsp.*;
 import lsp.replanning.LSPReplanningModule;
 import lsp.LSPCarrierResource;
-import lsp.scoring.LSPScoringModule;
+import lsp.scoring.LSPScoringListener;
 import lsp.shipment.LSPShipment;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.freight.carrier.Carrier;
@@ -42,22 +42,21 @@ import java.util.Collection;
 import java.util.List;
 
 
-class LSPControlerListenerImpl implements BeforeMobsimListener, AfterMobsimListener, ScoringListener,
-							  ReplanningListener, IterationStartsListener{
+class LSPControlerListenerImpl implements BeforeMobsimListener, AfterMobsimListener, ReplanningListener, IterationStartsListener{
 
 
 	private CarrierAgentTracker carrierResourceTracker;
 	private final Carriers carriers;
 	private final Scenario scenario;
 	private final LSPReplanningModule replanningModule;
-	private final LSPScoringModule scoringModule;
+	private final LSPScoringListener scoringModule;
 	private final Collection<LSPEventCreator> creators;
 
 	private List<EventHandler> registeredHandlers;
 
 	@Inject private EventsManager eventsManager;
 
-	@Inject LSPControlerListenerImpl( Scenario scenario, LSPReplanningModule replanningModule, LSPScoringModule scoringModule,
+	@Inject LSPControlerListenerImpl( Scenario scenario, LSPReplanningModule replanningModule, LSPScoringListener scoringModule,
 					  Collection<LSPEventCreator> creators ) {
 		this.scenario = scenario;
 		this.replanningModule = replanningModule;
@@ -77,6 +76,7 @@ class LSPControlerListenerImpl implements BeforeMobsimListener, AfterMobsimListe
 		registeredHandlers = new ArrayList<>();
 
 		for(LSP lsp : lsps.getLSPs().values()) {
+
 			for(LSPShipment shipment : lsp.getShipments()) {
 				for(EventHandler handler : shipment.getEventHandlers()) {
 					eventsManager.addHandler(handler);
@@ -84,19 +84,19 @@ class LSPControlerListenerImpl implements BeforeMobsimListener, AfterMobsimListe
 			}
 			LSPPlan selectedPlan = lsp.getSelectedPlan();
 			for(LogisticsSolution solution : selectedPlan.getSolutions()) {
-				for(EventHandler handler : solution.getEventHandlers()) {
-					eventsManager.addHandler(handler);
-				}
+//				for(EventHandler handler : solution.getEventHandlers()) {
+//					eventsManager.addHandler(handler);
+//				}
 				for(LogisticsSolutionElement element : solution.getSolutionElements()) {
-					for(EventHandler handler : element.getEventHandlers()) {
-						eventsManager.addHandler(handler);
-					}
-					for(EventHandler handler : element.getResource().getEventHandlers() ) {
-						if(!registeredHandlers.contains(handler)) {
-							eventsManager.addHandler(handler);
-							registeredHandlers.add(handler);
-						}
-					}
+//					for(EventHandler handler : element.getEventHandlers()) {
+//						eventsManager.addHandler(handler);
+//					}
+//					for(EventHandler handler : element.getResource().getEventHandlers() ) {
+//						if(!registeredHandlers.contains(handler)) {
+//							eventsManager.addHandler(handler);
+//							registeredHandlers.add(handler);
+//						}
+//					}
 				}
 			}
 		}
@@ -108,11 +108,6 @@ class LSPControlerListenerImpl implements BeforeMobsimListener, AfterMobsimListe
 	@Override
 	public void notifyReplanning(ReplanningEvent event) {
 		replanningModule.replanLSPs(event);
-	}
-
-	@Override
-	public void notifyScoring(ScoringEvent event) {
-		scoringModule.scoreLSPs(event);
 	}
 
 	@Override
@@ -198,16 +193,16 @@ class LSPControlerListenerImpl implements BeforeMobsimListener, AfterMobsimListe
 				}
 
 				for(LogisticsSolution solution : lsp.getSelectedPlan().getSolutions()) {
-					for(EventHandler handler : solution.getEventHandlers()) {
-						handler.reset(event.getIteration());
-					}
+//					for(EventHandler handler : solution.getEventHandlers()) {
+//						handler.reset(event.getIteration());
+//					}
 					for( LSPSimulationTracker tracker : solution.getSimulationTrackers()) {
 						tracker.reset();
 					}
 					for(LogisticsSolutionElement element : solution.getSolutionElements()) {
-						for(EventHandler handler : element.getEventHandlers()) {
-							handler.reset(event.getIteration());
-						}
+//						for(EventHandler handler : element.getEventHandlers()) {
+//							handler.reset(event.getIteration());
+//						}
 						for( LSPSimulationTracker tracker : element.getSimulationTrackers()) {
 							tracker.reset();
 						}

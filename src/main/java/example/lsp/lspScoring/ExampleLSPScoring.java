@@ -25,7 +25,7 @@ import lsp.controler.LSPModule;
 import lsp.replanning.LSPReplanningModule;
 import lsp.replanning.LSPReplanningModuleImpl;
 import lsp.LSPResource;
-import lsp.scoring.LSPScoringModule;
+import lsp.scoring.LSPScoringListener;
 import lsp.scoring.LSPScoringModuleDefaultImpl;
 import lsp.shipment.LSPShipment;
 import lsp.shipment.ShipmentUtils;
@@ -160,7 +160,7 @@ import java.util.*;
 			@Override public void install(){
 				install( new LSPModule() );
 				this.bind( LSPReplanningModule.class ).to( LSPReplanningModuleImpl.class );
-				this.bind( LSPScoringModule.class ).to( LSPScoringModuleDefaultImpl.class );
+				this.bind( LSPScoringListener.class ).to( LSPScoringModuleDefaultImpl.class );
 			}
 		});
 		return controler;

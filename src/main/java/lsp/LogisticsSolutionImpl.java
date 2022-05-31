@@ -84,10 +84,10 @@ import org.matsim.utils.objectattributes.attributable.Attributes;
 		shipments.add(shipment);	
 	}
 	
-	@Override
-	public Collection<EventHandler> getEventHandlers() {
-		return eventHandlers;
-	}
+//	@Override
+//	public Collection<EventHandler> getEventHandlers() {
+//		return eventHandlers;
+//	}
 
 
 	@Override

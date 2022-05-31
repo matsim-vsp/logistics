@@ -25,7 +25,7 @@ import lsp.controler.LSPModule;
 import lsp.replanning.LSPReplanningModule;
 import lsp.replanning.LSPReplanningModuleImpl;
 import lsp.scoring.LSPScorer;
-import lsp.scoring.LSPScoringModule;
+import lsp.scoring.LSPScoringListener;
 import lsp.scoring.LSPScoringModuleDefaultImpl;
 import lsp.shipment.LSPShipment;
 import lsp.shipment.ShipmentPlanElement;
@@ -39,6 +39,12 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.freight.FreightConfigGroup;
 import org.matsim.contrib.freight.carrier.*;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
+import org.matsim.contrib.freight.events.LSPFreightLinkEnterEvent;
+import org.matsim.contrib.freight.events.LSPFreightLinkLeaveEvent;
+import org.matsim.contrib.freight.events.LSPFreightVehicleLeavesTrafficEvent;
+import org.matsim.contrib.freight.events.eventhandler.LSPLinkEnterEventHandler;
+import org.matsim.contrib.freight.events.eventhandler.LSPLinkLeaveEventHandler;
+import org.matsim.contrib.freight.events.eventhandler.LSPVehicleLeavesTrafficEventHandler;
 import org.matsim.core.config.CommandLine;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -47,6 +53,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 
 import java.io.BufferedWriter;
@@ -116,13 +123,8 @@ import java.util.*;
 
 		log.info("create LSP");
 		LSP lsp = createInitialLSP( scenario.getNetwork() );
-		lsp.setScorer( new LSPScorer(){
-			@Override public double scoreCurrentPlan(){
-				return 0.;
-			}
-		} );
-
-
+		final MyLSPScorer scorer = new MyLSPScorer();
+		lsp.setScorer( scorer );
 
 		log.info("create initial LSPShipments");
 		log.info("assign the shipments to the LSP");
@@ -144,7 +146,8 @@ import java.util.*;
 			@Override public void install(){
 				install( new LSPModule() );
 				this.bind( LSPReplanningModule.class ).to( LSPReplanningModuleImpl.class );
-				this.bind( LSPScoringModule.class ).to( LSPScoringModuleDefaultImpl.class );
+				this.bind( LSPScoringListener.class ).to( LSPScoringModuleDefaultImpl.class );
+				this.addEventHandlerBinding().toInstance( scorer ); // ????
 			}
 		} );
 
@@ -267,11 +270,11 @@ import java.util.*;
 							.build() );
 
 			//The distribution adapter i.e. the Resource is created
-			LSPResource distributionAdapter = UsecaseUtils.DistributionCarrierAdapterBuilder.newInstance(
+			LSPResource distributionAdapter = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(
 										      Id.create( "DistributionCarrierAdapter", LSPResource.class ), network )
-													.setCarrier( distributionCarrier ).setLocationLinkId( hubLinkId )
-													.setDistributionScheduler( UsecaseUtils.createDefaultDistributionCarrierScheduler() )
-													.build();
+													 .setCarrier( distributionCarrier ).setLocationLinkId( hubLinkId )
+													 .setDistributionScheduler( UsecaseUtils.createDefaultDistributionCarrierScheduler() )
+													 .build();
 			// (The scheduler is where jsprit comes into play.)
 
 			//The adapter is now inserted into the corresponding LogisticsSolutionElement of the only LogisticsSolution of the LSP
@@ -302,11 +305,11 @@ import java.util.*;
 			directDistributionCarrier.setCarrierCapabilities(directDistributionCarrierCapabilities);
 
 			//The distribution adapter i.e. the Resource is created
-			LSPResource directDistributionAdapter = UsecaseUtils.DistributionCarrierAdapterBuilder.newInstance(
+			LSPResource directDistributionAdapter = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(
 											    Id.create( "DirectDistributionCarrierAdapter", LSPResource.class ), network )
-													      .setCarrier( directDistributionCarrier ).setLocationLinkId( depotLinkId )
-													      .setDistributionScheduler( UsecaseUtils.createDefaultDistributionCarrierScheduler() )
-													      .build();
+													       .setCarrier( directDistributionCarrier ).setLocationLinkId( depotLinkId )
+													       .setDistributionScheduler( UsecaseUtils.createDefaultDistributionCarrierScheduler() )
+													       .build();
 			// (The scheduler is where jsprit comes into play.)
 
 			//The adapter is now inserted into the corresponding LogisticsSolutionElement of the only LogisticsSolution of the LSP
@@ -459,8 +462,8 @@ import java.util.*;
 	}
 
 	private static Collection<LSPShipment> createInitialLSPShipments(Network network){
-		ArrayList<LSPShipment> shipmentList = new ArrayList<>();
-		ArrayList <Link> linkList = new ArrayList<>(network.getLinks().values());
+		List<LSPShipment> shipmentList = new ArrayList<>();
+		List <Link> linkList = new ArrayList<>(network.getLinks().values());
 		Random rand = new Random(1);
 		for(int i = 1; i < 6; i++) {
 			Id<LSPShipment> id = Id.create(i, LSPShipment.class);
@@ -499,7 +502,7 @@ import java.util.*;
 	private static void printResults(String outputDir, LSP lsp) {
 		try ( BufferedWriter writer = IOUtils.getBufferedWriter(  outputDir + "/schedules.txt" ) ){
 			for( LSPShipment shipment : lsp.getShipments() ){
-				ArrayList<ShipmentPlanElement> elementList = new ArrayList<>( shipment.getShipmentPlan().getPlanElements().values() );
+				List<ShipmentPlanElement> elementList = new ArrayList<>( shipment.getShipmentPlan().getPlanElements().values() );
 				elementList.sort( ShipmentUtils.createShipmentPlanElementComparator() );
 				final String str1 = "Shipment: " + shipment.getId();
 				System.out.println( str1 );
@@ -516,5 +519,43 @@ import java.util.*;
 			e.printStackTrace();
 		}
 	}
+
+	private static class MyLSPScorer implements LSPScorer, LSPLinkEnterEventHandler, LSPLinkLeaveEventHandler, LSPVehicleLeavesTrafficEventHandler {
+		// yyyyyy not so obvious that we need the vehicle events separately for LSP
+
+		private static final double valueOfTime = 1.;
+
+		private final Map<Id<Vehicle>, Double> map = new LinkedHashMap<>();
+		private double score = 0.;
+		MyLSPScorer() {
+			score = 0.;
+		}
+		@Override public void reset( int iteration ) {
+			score = 0.;
+		}
+		@Override public double scoreCurrentPlan(){
+			log.warn("scoring current plan with score=" + this.score );
+			return this.score;
+		}
+		@Override public void handleEvent( LSPFreightLinkEnterEvent event ){
+			map.put( event.getVehicleId(), event.getTime() );
+		}
+		@Override public void handleEvent( LSPFreightLinkLeaveEvent event ){
+			Double enterTime = map.remove( event.getVehicleId() );
+			if ( enterTime != null ){ // will be null on 1st link (since there is no LSPVehicleEntersTrafficEvent). kai, may'22
+				double duration = event.getTime() - enterTime;
+				score += duration * valueOfTime;
+			}
+		}
+		@Override public void handleEvent( LSPFreightVehicleLeavesTrafficEvent event ){
+			Double enterTime = map.remove( event.getVehicleId() );
+			if ( enterTime != null ){ // will be null on 1st link (since there is no LSPVehicleEntersTrafficEvent). kai, may'22
+				double duration = event.getTime() - enterTime;
+				score += duration * valueOfTime;
+			}
+		}
+	}
+
+
 
 }

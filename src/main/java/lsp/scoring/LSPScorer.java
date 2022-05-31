@@ -20,9 +20,6 @@
 
 package lsp.scoring;
 
-import org.matsim.core.controler.listener.ControlerListener;
-import org.matsim.core.events.handler.EventHandler;
-
-public interface LSPScorer extends EventHandler, ControlerListener{
+public interface LSPScorer {
 	double scoreCurrentPlan();
 }

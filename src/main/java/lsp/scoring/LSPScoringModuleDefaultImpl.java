@@ -27,27 +27,18 @@ import lsp.LSPs;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.controler.events.ScoringEvent;
 
-public class LSPScoringModuleDefaultImpl implements LSPScoringModule{
+public class LSPScoringModuleDefaultImpl implements LSPScoringListener{
 
 	private final Scenario scenario;
 	@Inject LSPScoringModuleDefaultImpl( Scenario scenario ) {
 		this.scenario = scenario;
 	}
 	
-//	LSPScoringModuleImpl(LSPs lsps) {
-//		this.lsps = lsps;
-//	}
-		
-	@Override
-	public void notifyScoring(ScoringEvent event) {
-		scoreLSPs(event);
-	}
-
-	@Override
-	public void scoreLSPs(ScoringEvent arg0) {
+	@Override public void notifyScoring(ScoringEvent event) {
 		LSPs lsps = LSPUtils.getLSPs( scenario );
 		for(LSP lsp : lsps.getLSPs().values()) {
 			lsp.scoreSelectedPlan();
 		}
 	}
+
 }
