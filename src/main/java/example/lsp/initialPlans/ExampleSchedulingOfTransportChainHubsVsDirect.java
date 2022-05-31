@@ -117,20 +117,12 @@ import java.util.*;
 		log.info("create LSP");
 		LSP lsp = createInitialLSP( scenario.getNetwork() );
 		lsp.setScorer( new LSPScorer(){
-			private LSP lsp;
-			@Override public double scoreCurrentPlan( LSP lsp ){
-				lsp.getSelectedPlan().setScore( 0. );
+			@Override public double scoreCurrentPlan(){
 				return 0.;
-				// yyyy unclear if this is supposed to set the score.  Or just return it.  kai, may'22
-				// yyyyyy we need to look into matsim design and check how it is done there.  kai, may'22
-			}
-			@Override public void setEmbeddingContainer( LSP pointer ){
-				this.lsp = pointer;
-			}
-			@Override public LSP getEmbeddingContainer(){
-				return this.lsp;
 			}
 		} );
+
+
 
 		log.info("create initial LSPShipments");
 		log.info("assign the shipments to the LSP");
@@ -341,9 +333,9 @@ import java.util.*;
 				LSPPlan lspPlan_Reloading = createLSPPlan_reloading(depotElement, mainRunElement, hubElement, distributionElement);
 
 				return LSPUtils.LSPBuilder.getInstance(Id.create("LSPwithReloading", LSP.class))
-						.setInitialPlan(lspPlan_Reloading)
-						.setSolutionScheduler(UsecaseUtils.createDefaultSimpleForwardSolutionScheduler(createResourcesListFromLSPPlan(lspPlan_Reloading)))
-						.build();
+							  .setInitialPlan(lspPlan_Reloading)
+							  .setSolutionScheduler(UsecaseUtils.createDefaultSimpleForwardSolutionScheduler(createResourcesListFromLSPPlan(lspPlan_Reloading)))
+							  .build();
 
 			}
 			case onePlan_direct: {
@@ -353,9 +345,9 @@ import java.util.*;
 				LSPPlan lspPlan_direct = createLSPPlan_direct(depotElement, directDistributionElement);
 
 				return LSPUtils.LSPBuilder.getInstance(Id.create("LSPdirect", LSP.class))
-						.setInitialPlan(lspPlan_direct)
-						.setSolutionScheduler(UsecaseUtils.createDefaultSimpleForwardSolutionScheduler(createResourcesListFromLSPPlan(lspPlan_direct)))
-						.build();
+							  .setInitialPlan(lspPlan_direct)
+							  .setSolutionScheduler(UsecaseUtils.createDefaultSimpleForwardSolutionScheduler(createResourcesListFromLSPPlan(lspPlan_direct)))
+							  .build();
 			}
 
 			case twoPlans_directAndHub: {
@@ -375,9 +367,9 @@ import java.util.*;
 				resourcesList.addAll(createResourcesListFromLSPPlan(lspPlan_Reloading));
 
 				final LSP lsp = LSPUtils.LSPBuilder.getInstance(Id.create("LSPdirect", LSP.class))
-						.setInitialPlan(lspPlan_direct)
-						.setSolutionScheduler(UsecaseUtils.createDefaultSimpleForwardSolutionScheduler(resourcesList))
-						.build();
+								   .setInitialPlan(lspPlan_direct)
+								   .setSolutionScheduler(UsecaseUtils.createDefaultSimpleForwardSolutionScheduler(resourcesList))
+								   .build();
 
 				lsp.addPlan(lspPlan_Reloading); //adding the second plan
 

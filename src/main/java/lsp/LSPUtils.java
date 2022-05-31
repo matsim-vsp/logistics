@@ -47,8 +47,8 @@ public final class LSPUtils{
 		SolutionScheduler solutionScheduler;
 		LSPPlan initialPlan;
 		final Collection<LSPResource> resources;
-		LSPScorer scorer;
-		LSPReplanner replanner;
+//		LSPScorer scorer;
+//		LSPReplanner replanner;
 
 
 		public static LSPBuilder getInstance(Id<LSP> id){
@@ -65,15 +65,15 @@ public final class LSPUtils{
 			return this;
 		}
 
-		public LSPBuilder setSolutionScorer( LSPScorer scorer ){
-			this.scorer = scorer;
-			return this;
-		}
-
-		public LSPBuilder setReplanner( LSPReplanner replanner ){
-			this.replanner= replanner;
-			return this;
-		}
+//		public LSPBuilder setScorer( LSPScorer scorer ){
+//			this.scorer = scorer;
+//			return this;
+//		}
+//
+//		public LSPBuilder setReplanner( LSPReplanner replanner ){
+//			this.replanner= replanner;
+//			return this;
+//		}
 
 
 		public LSPBuilder setInitialPlan( LSPPlan plan ){

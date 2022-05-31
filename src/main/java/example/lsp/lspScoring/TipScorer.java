@@ -22,43 +22,36 @@ package example.lsp.lspScoring;
 
 import lsp.LSP;
 import lsp.scoring.LSPScorer;
-import org.matsim.utils.objectattributes.attributable.Attributes;
+import org.matsim.contrib.freight.events.LSPServiceEndEvent;
+import org.matsim.contrib.freight.events.eventhandler.LSPServiceEndEventHandler;
 
-import java.util.Map;
+import java.util.Random;
 
-/*package-private*/ class TipScorer implements LSPScorer {
+/*package-private*/ class TipScorer implements LSPScorer, LSPServiceEndEventHandler {
 
-	private final TipSimulationTracker tracker;
+	private final Random tipRandom;
+	private double tipSum;
 
-	/*package-private*/ TipScorer(LSP lsp, TipSimulationTracker tracker) {
-		this.tracker = tracker;
+	/*package-private*/ TipScorer() {
+		tipRandom = new Random(1);
+		tipSum = 0.;
+
 	}
 	
 	@Override
-	public double scoreCurrentPlan(LSP lsp) {
-		double score = 0;
-//		for(LSPInfo info : tracker.getAttributes()) {
-//			if(info instanceof TipInfo) {
-//				Attributes function = info.getAttributes();
-//				for(  Map.Entry<String,Object> entry : function.getAsMap().entrySet() ) {
-//					if(entry.getKey().equals("TIP IN EUR") && entry.getValue() instanceof Double) {
-//						double trinkgeldValue = (Double) entry.getValue();
-//						score += trinkgeldValue;
-//					}
-//				}
-//			}
-//		}
-
-		Double tip = (Double) tracker.getAttributes().getAttribute( "TIP IN EUR" );
-		if ( tip != null ){
-			score += tip;
-		}
-
-		return score;
+	public double scoreCurrentPlan() {
+		return tipSum;
 	}
 
-	@Override public LSP getEmbeddingContainer(){
-		throw new RuntimeException( "not implemented" );
+	@Override
+	public void reset(int iteration) {
+		tipSum = 0.;
+	}
+
+	@Override
+	public void handleEvent( LSPServiceEndEvent event ) {
+		double tip = tipRandom.nextDouble() * 5;
+		tipSum += tip;
 	}
 
 

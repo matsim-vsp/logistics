@@ -57,14 +57,6 @@ import org.matsim.utils.objectattributes.attributable.Attributes;
 		this.selectedPlan.setLSP(this );
 		this.plans.add(builder.initialPlan);
 		this.resources = builder.resources;
-		this.scorer = builder.scorer;
-		if(this.scorer != null) {
-			this.scorer.setEmbeddingContainer(this );
-		}	
-		this.replanner = builder.replanner;
-		if(this.replanner != null) {
-			this.replanner.setEmbeddingContainer(this );
-		}	
 	}
 	
 	
@@ -163,7 +155,7 @@ import org.matsim.utils.objectattributes.attributable.Attributes;
 
 	public void scoreSelectedPlan() {
 		if(this.scorer != null) {
-			double score = scorer.scoreCurrentPlan(this);
+			double score = scorer.scoreCurrentPlan();
 			this.selectedPlan.setScore(score);
 		} else {
 			final String msg = "trying to score the current LSP plan, but scorer is not set.";
@@ -185,20 +177,16 @@ import org.matsim.utils.objectattributes.attributable.Attributes;
 		}
 	}
 
-
 	@Override
 	public void setScorer(LSPScorer scorer) {
 		this.scorer =  scorer;
 	}
-
 
 	@Override
 	public void setReplanner(LSPReplanner replanner) {
 		this.replanner = replanner;
 	}
 
-
-	
 	@Override
 	public Collection<LSPShipment> getShipments() {
 		return this.shipments ;

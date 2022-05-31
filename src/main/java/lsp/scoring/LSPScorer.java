@@ -20,10 +20,9 @@
 
 package lsp.scoring;
 
-import lsp.HasBackpointer;
-import lsp.LSP;
+import org.matsim.core.controler.listener.ControlerListener;
+import org.matsim.core.events.handler.EventHandler;
 
-public interface LSPScorer extends HasBackpointer<LSP> {
-	// yyyy why lsp as argument if there is already a backpointer?  kai, may'22
-	double scoreCurrentPlan(LSP lsp);
+public interface LSPScorer extends EventHandler, ControlerListener{
+	double scoreCurrentPlan();
 }

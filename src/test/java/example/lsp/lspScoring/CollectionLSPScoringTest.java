@@ -100,9 +100,9 @@ public class CollectionLSPScoringTest {
 //		LSPAttributes function = LSPInfoFunctionUtils.createDefaultInfoFunction();
 //		function.getAttributes().add(value );
 //		TipInfo info = new TipInfo();
-		TipSimulationTracker tipTracker = new TipSimulationTracker();
-		collectionAdapter.addSimulationTracker(tipTracker);
-		LSPScorer tipScorer = new TipScorer(collectionLSP, tipTracker);
+//		TipSimulationTracker tipTracker = new TipSimulationTracker();
+//		collectionAdapter.addSimulationTracker(tipTracker);
+		LSPScorer tipScorer = new TipScorer();
 		collectionLSP.setScorer(tipScorer);
 
 		ArrayList<Link> linkList = new ArrayList<>(network.getLinks().values());
