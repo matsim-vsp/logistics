@@ -110,27 +110,27 @@ import java.util.Map;
 		return nextElement;
 	}
 
-	@Override
-	public void addSimulationTracker( LSPSimulationTracker tracker ) {
-		trackers.add(tracker);
-
-		// can't say if this hierarchical design is useful or confusing. kai, may'22
-		// yy should maybe check for overwriting?  However, did also not check in original design. kai, may'22
-		for( Map.Entry<String, Object> entry : tracker.getAttributes().getAsMap().entrySet() ){
-			attributes.putAttribute( entry.getKey(), entry.getValue() );
-		}
-
-		handlers.addAll(tracker.getEventHandlers());
-	}
+//	@Override
+//	public void addSimulationTracker( LSPSimulationTracker tracker ) {
+//		trackers.add(tracker);
+//
+//		// can't say if this hierarchical design is useful or confusing. kai, may'22
+//		// yy should maybe check for overwriting?  However, did also not check in original design. kai, may'22
+//		for( Map.Entry<String, Object> entry : tracker.getAttributes().getAsMap().entrySet() ){
+//			attributes.putAttribute( entry.getKey(), entry.getValue() );
+//		}
+//
+//		handlers.addAll(tracker.getEventHandlers());
+//	}
 
 	public Collection<EventHandler> getEventHandlers(){
 		return handlers;
 	}
 
-	@Override
-	public Collection<LSPSimulationTracker> getSimulationTrackers() {
-		return trackers;
-	}
+//	@Override
+//	public Collection<LSPSimulationTracker> getSimulationTrackers() {
+//		return trackers;
+//	}
 	@Override public Attributes getAttributes(){
 		return attributes;
 	}

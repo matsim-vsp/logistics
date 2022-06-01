@@ -115,20 +115,20 @@ import org.matsim.utils.objectattributes.attributable.Attributes;
 		return eventHandlers;
 	}
 
-	@Override
-	public void addSimulationTracker( LSPSimulationTracker tracker ) {
-		this.trackers.add(tracker);
-		this.eventHandlers.addAll(tracker.getEventHandlers());
-//		this.infos.addAll(tracker.getAttributes() );
-		for( Map.Entry<String, Object> entry : tracker.getAttributes().getAsMap().entrySet() ){
-			this.attributes.putAttribute( entry.getKey(), entry.getValue());
-		}
-	}
-
-	@Override
-	public Collection<LSPSimulationTracker> getSimulationTrackers() {
-		return trackers;
-	}
+//	@Override
+//	public void addSimulationTracker( LSPSimulationTracker tracker ) {
+//		this.trackers.add(tracker);
+//		this.eventHandlers.addAll(tracker.getEventHandlers());
+////		this.infos.addAll(tracker.getAttributes() );
+//		for( Map.Entry<String, Object> entry : tracker.getAttributes().getAsMap().entrySet() ){
+//			this.attributes.putAttribute( entry.getKey(), entry.getValue());
+//		}
+//	}
+//
+//	@Override
+//	public Collection<LSPSimulationTracker> getSimulationTrackers() {
+//		return trackers;
+//	}
 	@Override public Attributes getAttributes(){
 		return attributes;
 	}

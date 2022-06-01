@@ -120,15 +120,15 @@ class LSPControlerListenerImpl implements BeforeMobsimListener, AfterMobsimListe
 		for(LSP lsp : lsps.getLSPs().values()) {
 			for(LogisticsSolution solution : lsp.getSelectedPlan().getSolutions()) {
 				for(LogisticsSolutionElement element : solution.getSolutionElements()) {
-					for( LSPSimulationTracker tracker : element.getResource().getSimulationTrackers()) {
-						if(!alreadyUpdatedTrackers.contains(tracker)) {
-							tracker.notifyAfterMobsim(event);
-							alreadyUpdatedTrackers.add(tracker);
-						}
-					}
-					for( LSPSimulationTracker tracker : element.getSimulationTrackers()) {
-						tracker.notifyAfterMobsim(event);
-					}
+//					for( LSPSimulationTracker tracker : element.getResource().getSimulationTrackers()) {
+//						if(!alreadyUpdatedTrackers.contains(tracker)) {
+//							tracker.notifyAfterMobsim(event);
+//							alreadyUpdatedTrackers.add(tracker);
+//						}
+//					}
+//					for( LSPSimulationTracker tracker : element.getSimulationTrackers()) {
+//						tracker.notifyAfterMobsim(event);
+//					}
 				}
 				for( LSPSimulationTracker tracker : solution.getSimulationTrackers()) {
 					tracker.notifyAfterMobsim(event);
@@ -203,15 +203,15 @@ class LSPControlerListenerImpl implements BeforeMobsimListener, AfterMobsimListe
 //						for(EventHandler handler : element.getEventHandlers()) {
 //							handler.reset(event.getIteration());
 //						}
-						for( LSPSimulationTracker tracker : element.getSimulationTrackers()) {
-							tracker.reset();
-						}
+//						for( LSPSimulationTracker tracker : element.getSimulationTrackers()) {
+//							tracker.reset();
+//						}
 						for(EventHandler handler : element.getResource().getEventHandlers()) {
 							handler.reset(event.getIteration());
 						}
-						for( LSPSimulationTracker tracker : element.getResource().getSimulationTrackers()) {
-							tracker.reset();
-						}
+//						for( LSPSimulationTracker tracker : element.getResource().getSimulationTrackers()) {
+//							tracker.reset();
+//						}
 					}
 				}
 			}
