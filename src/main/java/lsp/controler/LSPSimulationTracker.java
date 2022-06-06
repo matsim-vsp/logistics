@@ -20,14 +20,18 @@
 
 package lsp.controler;
 
+import lsp.HasBackpointer;
 import lsp.HasEventHandlers;
+import lsp.KnowsLSP;
 import org.matsim.core.controler.listener.AfterMobsimListener;
 import org.matsim.utils.objectattributes.attributable.Attributable;
 
 /**
  * @deprecated -- try to do without
  */
-public interface LSPSimulationTracker extends AfterMobsimListener, HasEventHandlers, Attributable{
+public interface LSPSimulationTracker<T> extends AfterMobsimListener, HasEventHandlers, HasBackpointer<T>
+		//, Attributable // try to avid Attributable for objects that we will never write or read.  kai, jun'22
+		 {
 
 	/**
 	 * @deprecated -- try to do without
