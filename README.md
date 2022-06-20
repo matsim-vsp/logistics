@@ -1,6 +1,5 @@
 # Logistics Service Provider (LSP)
 
-
 This code deals with creating logitics chains for good transport. 
 It is based on work in the dfg-freight project.
 
