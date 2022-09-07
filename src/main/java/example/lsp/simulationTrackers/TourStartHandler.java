@@ -20,7 +20,8 @@
 
 package example.lsp.simulationTrackers;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.contrib.freight.events.LSPTourStartEvent;
 import org.matsim.contrib.freight.events.eventhandler.LSPTourStartEventHandler;
 import org.matsim.vehicles.Vehicle;
