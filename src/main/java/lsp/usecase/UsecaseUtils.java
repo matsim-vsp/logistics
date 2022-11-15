@@ -73,7 +73,7 @@ public class UsecaseUtils {
 	 * <p>
 	 * KMT/Jul22
 	 *
-	 * @param carrier
+	 * @param carrier carrier
 	 * @return Collection of VehicleTypes
 	 */
 	static Collection<VehicleType> getVehicleTypeCollection(Carrier carrier) {
@@ -84,8 +84,14 @@ public class UsecaseUtils {
 		return vehicleTypeCollection;
 	}
 
+	/**
+	 * Prints out the <b>plan</b> of the shipment - this is not the shipment's log
+	 *
+	 * @param outputDir output directory to write out the log
+	 * @param lsp the lps, for which the shipmentLog should be printed
+	 */
 
-	public static void printResults_shipmentPlan(String outputDir, LSP lsp) {
+	public static void writeShipmentPlanToFile(String outputDir, LSP lsp) {
 		System.out.println("Writing out shipmentPlan for LSP");
 		try (BufferedWriter writer = IOUtils.getBufferedWriter(outputDir + "/" + lsp.getId().toString() + "_schedules.tsv")) {
 			final String str0 = "LSP: " + lsp.getId();
@@ -111,13 +117,14 @@ public class UsecaseUtils {
 	}
 
 	/**
-	 * Prints out the log of the shipment - this is not the shipment's plan
-	 * Maybe the log will get removed soon. kmt sep/oct'22
+	 * Prints out the <b>log</b> of the shipment - this is not the shipment's plan
+	 * @deprecated Maybe the log will be removed soon - This information should be available in the Events. kmt sep/oct'22
 	 *
-	 * @param outputDir
-	 * @param lsp
+	 * @param outputDir output directory to write out the log
+	 * @param lsp the lps, for which the shipmentLog should be printed
 	 */
-	public static void printResults_shipmentLog(String outputDir, LSP lsp) {
+	@Deprecated(since="oct 22")
+	public static void writeShipmentLogToFile(String outputDir, LSP lsp) {
 		System.out.println("Writing out shipmentLog for LSP");
 		try (BufferedWriter writer = IOUtils.getBufferedWriter(outputDir + "/" + lsp.getId().toString() + "_shipmentLogs.tsv")) {
 			final String str0 = "LSP: " + lsp.getId();
