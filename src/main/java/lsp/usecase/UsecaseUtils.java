@@ -27,6 +27,8 @@ import lsp.LogisticsSolutionElement;
 import lsp.shipment.LSPShipment;
 import lsp.shipment.ShipmentPlanElement;
 import lsp.shipment.ShipmentUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -41,6 +43,8 @@ import java.io.IOException;
 import java.util.*;
 
 public class UsecaseUtils {
+
+	private static final Logger log = LogManager.getLogger(UsecaseUtils.class);
 
 	public static CollectionCarrierScheduler createDefaultCollectionCarrierScheduler() {
 		return new CollectionCarrierScheduler();
@@ -163,6 +167,7 @@ public class UsecaseUtils {
 		}
 
 		public CollectionCarrierResourceBuilder setCarrier(Carrier carrier) {
+			setCarrierType(carrier, CARRIER_TYPE.collectionCarrier);
 			this.carrier = carrier;
 			return this;
 		}
@@ -205,6 +210,7 @@ public class UsecaseUtils {
 		}
 
 		public DistributionCarrierResourceBuilder setCarrier(Carrier carrier) {
+			setCarrierType(carrier, CARRIER_TYPE.distributionCarrier);
 			this.carrier = carrier;
 			return this;
 		}
@@ -242,6 +248,7 @@ public class UsecaseUtils {
 		}
 
 		public MainRunCarrierResourceBuilder setCarrier(Carrier carrier) {
+			setCarrierType(carrier, CARRIER_TYPE.mainRunCarrier);
 			this.carrier = carrier;
 			return this;
 		}
@@ -377,5 +384,21 @@ public class UsecaseUtils {
 
 	}
 
+	enum CARRIER_TYPE {collectionCarrier, mainRunCarrier, distributionCarrier, undefined}
+
+	private static final String CARRIER_TYPE_ATTR = "carrierType" ;
+
+	/*package-private*/ static CARRIER_TYPE getCarrierType(Carrier carrier ) {
+		CARRIER_TYPE result = (CARRIER_TYPE) carrier.getAttributes().getAttribute(CARRIER_TYPE_ATTR);
+		if (result == null){
+			log.error("Requested attribute " + CARRIER_TYPE_ATTR + " does not exists. Will return " + CARRIER_TYPE.undefined );
+			return CARRIER_TYPE.undefined;
+		} else {
+			return result ;
+		}
+	}
+	private static void setCarrierType( Carrier carrier,  CARRIER_TYPE carrierType ) {
+		carrier.getAttributes().putAttribute(CARRIER_TYPE_ATTR, carrierType ) ;
+	}
 
 }
