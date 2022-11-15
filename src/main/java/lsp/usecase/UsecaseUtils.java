@@ -149,6 +149,8 @@ public class UsecaseUtils {
 		}
 	}
 
+	public enum VehicleReturn {returnToFromLink, endAtToLink}
+
 	public static class CollectionCarrierResourceBuilder {
 
 		final Id<LSPResource> id;
@@ -243,6 +245,7 @@ public class UsecaseUtils {
 		private Id<Link> fromLinkId;
 		private Id<Link> toLinkId;
 		private MainRunCarrierScheduler mainRunScheduler;
+		private VehicleReturn vehicleReturn;
 
 		private MainRunCarrierResourceBuilder(Id<LSPResource> id, Network network) {
 			this.id = id;
@@ -271,6 +274,11 @@ public class UsecaseUtils {
 		}
 		public MainRunCarrierResourceBuilder setMainRunCarrierScheduler(MainRunCarrierScheduler mainRunScheduler) {
 			this.mainRunScheduler = mainRunScheduler;
+			return this;
+		}
+
+		public MainRunCarrierResourceBuilder setVehicleReturn(VehicleReturn vehicleReturn){
+			this.vehicleReturn = vehicleReturn;
 			return this;
 		}
 
@@ -306,6 +314,10 @@ public class UsecaseUtils {
 
 		Network getNetwork() {
 			return network;
+		}
+
+		VehicleReturn getVehicleReturn() {
+			return vehicleReturn;
 		}
 	}
 
