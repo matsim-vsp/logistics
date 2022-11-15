@@ -36,8 +36,8 @@ import org.matsim.contrib.freight.carrier.ScheduledTour;
 import org.matsim.contrib.freight.carrier.Tour;
 import org.matsim.contrib.freight.carrier.Tour.ServiceActivity;
 import org.matsim.contrib.freight.carrier.Tour.TourElement;
-import org.matsim.contrib.freight.events.FreightTourEndEvent;
-import org.matsim.contrib.freight.events.eventhandler.FreightTourEndEventHandler;
+import org.matsim.contrib.freight.events.FreightServiceEndEvent;
+import org.matsim.contrib.freight.events.eventhandler.FreightServiceEndEventHandler;
 import org.matsim.contrib.freight.utils.FreightUtils;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
@@ -46,7 +46,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-/*package-private*/  class TransshipmentHubTourEndEventHandler implements AfterMobsimListener, LSPSimulationTracker<LSPResource>, FreightTourEndEventHandler {
+/*package-private*/  class TransshipmentHubTourEndEventHandler implements AfterMobsimListener, LSPSimulationTracker<LSPResource>, FreightServiceEndEventHandler {
 
 //	@Inject Scenario scenario;
 	private final Scenario scenario;
@@ -98,14 +98,18 @@ import java.util.Map;
 	}
 
 	@Override
-	public void handleEvent(FreightTourEndEvent event) {
+	public void handleEvent(FreightServiceEndEvent event) {
 		Tour tour = null;
 		Carrier carrier = FreightUtils.getCarriers(scenario).getCarriers().get(event.getCarrierId());
 		Collection<ScheduledTour> scheduledTours = carrier.getSelectedPlan().getScheduledTours();
 		for (ScheduledTour scheduledTour : scheduledTours) {
-			if (scheduledTour.getTour().getId() == event.getTourId()) {
-				tour = scheduledTour.getTour();
-				break;
+			for (TourElement tourElement : scheduledTour.getTour().getTourElements()) {
+				if (tourElement instanceof ServiceActivity serviceActivity) {
+					if (serviceActivity.getService().getId() == event.getServiceId()){
+						tour = scheduledTour.getTour();
+						break;
+					}
+				}
 			}
 		}
 		if ((event.getLinkId() == this.linkId)) {
