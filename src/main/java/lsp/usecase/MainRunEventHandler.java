@@ -53,6 +53,10 @@ import java.util.LinkedHashMap;
 	private LSPShipment lspShipment;
 	private final Tour tour;
 
+
+	HashMap<Id<Carrier>, HashMap > servicesOfCarrier = new LinkedHashMap<>();
+	HashMap<Id<CarrierService>, Double> timeOfServiceStart = new LinkedHashMap<>();
+
 	MainRunEventHandler(LSPShipment lspShipment, CarrierService carrierService, LogisticsSolutionElement solutionElement, LSPCarrierResource resource, Tour tour) {
 		this.lspShipment = lspShipment;
 		this.carrierService = carrierService;
@@ -67,25 +71,6 @@ import java.util.LinkedHashMap;
 		// TODO Auto-generated method stub
 	}
 
-	HashMap<Id<Carrier>, HashMap > servicesOfCarrier = new LinkedHashMap<>();
-	HashMap<Id<CarrierService>, Double> timeOfServiceStart = new LinkedHashMap<>();
-	@Override public void handleEvent(FreightServiceStartEvent event) {
-		timeOfServiceStart.put(event.getServiceId(), event.getTime());
-		servicesOfCarrier.put(event.getCarrierId(), timeOfServiceStart);
-	}
-
-	@Override
-	public void handleEvent(FreightServiceEndEvent event) {
-			for (TourElement tourElement : tour.getTourElements()) {
-				if (tourElement instanceof ServiceActivity serviceActivity) {
-					if (serviceActivity.getService().getId() == carrierService.getId() && event.getCarrierId() == resource.getCarrier().getId()) {
-						logUnload(event);
-						logTransport(event);
-					}
-				}
-			}
-	}
-
 	@Override
 	public void handleEvent(FreightTourStartEvent event) {
 		if (event.getTourId().equals(tour.getId())) {
@@ -93,8 +78,26 @@ import java.util.LinkedHashMap;
 				if (tourElement instanceof ServiceActivity serviceActivity) {
 					if (serviceActivity.getService().getId() == carrierService.getId() && event.getCarrierId() == resource.getCarrier().getId()) {
 						logLoad(event, tour);
-						logTransport(event, tour);
+						logTransport_beginOfTransport(event, tour);
 					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void handleEvent(FreightServiceStartEvent event) {
+		timeOfServiceStart.put(event.getServiceId(), event.getTime());
+		servicesOfCarrier.put(event.getCarrierId(), timeOfServiceStart);
+	}
+
+	@Override
+	public void handleEvent(FreightServiceEndEvent event) {
+		for (TourElement tourElement : tour.getTourElements()) {
+			if (tourElement instanceof ServiceActivity serviceActivity) {
+				if (serviceActivity.getService().getId() == carrierService.getId() && event.getCarrierId() == resource.getCarrier().getId()) {
+					logUnload(event);
+					logTransport_addEndInformation(event);
 				}
 			}
 		}
@@ -128,7 +131,7 @@ import java.util.LinkedHashMap;
 		return cumulatedLoadingTime;
 	}
 
-	private void logTransport(FreightTourStartEvent event, Tour tour) {
+	private void logTransport_beginOfTransport(FreightTourStartEvent event, Tour tour) {
 		ShipmentUtils.LoggedShipmentTransportBuilder builder = ShipmentUtils.LoggedShipmentTransportBuilder.newInstance();
 		builder.setCarrierId(event.getCarrierId());
 		builder.setFromLinkId(event.getLinkId());
@@ -162,7 +165,7 @@ import java.util.LinkedHashMap;
 		}
 	}
 
-	private void logTransport(FreightServiceEndEvent event) {
+	private void logTransport_addEndInformation(FreightServiceEndEvent event) {
 		if (servicesOfCarrier.containsKey(event.getCarrierId())) {
 			String idString = resource.getId() + "" + solutionElement.getId() + "" + "TRANSPORT";
 			Id<ShipmentPlanElement> id = Id.create(idString, ShipmentPlanElement.class);
