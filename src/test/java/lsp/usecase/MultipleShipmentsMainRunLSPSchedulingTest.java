@@ -386,8 +386,8 @@ public class MultipleShipmentsMainRunLSPSchedulingTest {
 			assertSame(serviceHandler.getResourceId(), planElements.get(2).getResourceId());
 			assertSame(serviceHandler.getResourceId(), resources.get(0).getId());
 
-			assertTrue(eventHandlers.get(2) instanceof MainRunTourStartEventHandler);
-			MainRunTourStartEventHandler startHandler = (MainRunTourStartEventHandler) eventHandlers.get(2);
+			assertTrue(eventHandlers.get(2) instanceof MainRunEventHandler);
+			MainRunEventHandler startHandler = (MainRunEventHandler) eventHandlers.get(2);
 			assertSame(startHandler.getCarrierService().getLocationLinkId(), toLinkId);
 			assertEquals(startHandler.getCarrierService().getServiceDuration(), shipment.getDeliveryServiceTime(), 0.0);
 			assertEquals(startHandler.getCarrierService().getCapacityDemand(), shipment.getSize());
@@ -403,8 +403,8 @@ public class MultipleShipmentsMainRunLSPSchedulingTest {
 			assertSame(startHandler.getResource().getId(), planElements.get(6).getResourceId());
 			assertSame(startHandler.getResource().getId(), resources.get(2).getId());
 
-			assertTrue(eventHandlers.get(3) instanceof MainRunTourEndEventHandler);
-			MainRunTourEndEventHandler mainRunEndHandler = (MainRunTourEndEventHandler) eventHandlers.get(3);
+			assertTrue(eventHandlers.get(3) instanceof MainRunEventHandler);
+			MainRunEventHandler mainRunEndHandler = (MainRunEventHandler) eventHandlers.get(3);
 			assertSame(mainRunEndHandler.getCarrierService().getLocationLinkId(), toLinkId);
 			assertEquals(mainRunEndHandler.getCarrierService().getServiceDuration(), shipment.getDeliveryServiceTime(), 0.0);
 			assertEquals(mainRunEndHandler.getCarrierService().getCapacityDemand(), shipment.getSize());

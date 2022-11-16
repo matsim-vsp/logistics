@@ -28,25 +28,32 @@ import lsp.shipment.ShipmentLeg;
 import lsp.shipment.ShipmentPlanElement;
 import lsp.shipment.ShipmentUtils;
 import org.matsim.api.core.v01.Id;
+import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierService;
 import org.matsim.contrib.freight.carrier.Tour;
 import org.matsim.contrib.freight.carrier.Tour.ServiceActivity;
 import org.matsim.contrib.freight.carrier.Tour.TourElement;
+import org.matsim.contrib.freight.events.FreightServiceEndEvent;
+import org.matsim.contrib.freight.events.FreightServiceStartEvent;
 import org.matsim.contrib.freight.events.FreightTourStartEvent;
+import org.matsim.contrib.freight.events.eventhandler.FreightServiceEndEventHandler;
+import org.matsim.contrib.freight.events.eventhandler.FreightServiceStartEventHandler;
 import org.matsim.contrib.freight.events.eventhandler.FreightTourStartEventHandler;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
 
-/*package-private*/ class MainRunTourStartEventHandler implements AfterMobsimListener, FreightTourStartEventHandler, LSPSimulationTracker<LSPShipment> {
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
-	private final Tour tour;
+/*package-private*/ class MainRunEventHandler implements AfterMobsimListener, FreightTourStartEventHandler, FreightServiceStartEventHandler, FreightServiceEndEventHandler, LSPSimulationTracker<LSPShipment> {
+
 	private final CarrierService carrierService;
 	private final LogisticsSolutionElement solutionElement;
 	private final LSPCarrierResource resource;
 	private LSPShipment lspShipment;
+	private final Tour tour;
 
-
-	public MainRunTourStartEventHandler(LSPShipment lspShipment, CarrierService carrierService, LogisticsSolutionElement solutionElement, LSPCarrierResource resource, Tour tour) {
+	MainRunEventHandler(LSPShipment lspShipment, CarrierService carrierService, LogisticsSolutionElement solutionElement, LSPCarrierResource resource, Tour tour) {
 		this.lspShipment = lspShipment;
 		this.carrierService = carrierService;
 		this.solutionElement = solutionElement;
@@ -58,6 +65,25 @@ import org.matsim.core.controler.listener.AfterMobsimListener;
 	@Override
 	public void reset(int iteration) {
 		// TODO Auto-generated method stub
+	}
+
+	HashMap<Id<Carrier>, HashMap > servicesOfCarrier = new LinkedHashMap<>();
+	HashMap<Id<CarrierService>, Double> timeOfServiceStart = new LinkedHashMap<>();
+	@Override public void handleEvent(FreightServiceStartEvent event) {
+		timeOfServiceStart.put(event.getServiceId(), event.getTime());
+		servicesOfCarrier.put(event.getCarrierId(), timeOfServiceStart);
+	}
+
+	@Override
+	public void handleEvent(FreightServiceEndEvent event) {
+			for (TourElement tourElement : tour.getTourElements()) {
+				if (tourElement instanceof ServiceActivity serviceActivity) {
+					if (serviceActivity.getService().getId() == carrierService.getId() && event.getCarrierId() == resource.getCarrier().getId()) {
+						logUnload(event);
+						logTransport(event);
+					}
+				}
+			}
 	}
 
 	@Override
@@ -74,6 +100,9 @@ import org.matsim.core.controler.listener.AfterMobsimListener;
 		}
 	}
 
+
+	//--- internal methods
+
 	private void logLoad(FreightTourStartEvent event, Tour tour) {
 		ShipmentUtils.LoggedShipmentLoadBuilder builder = ShipmentUtils.LoggedShipmentLoadBuilder.newInstance();
 		builder.setCarrierId(event.getCarrierId());
@@ -87,6 +116,7 @@ import org.matsim.core.controler.listener.AfterMobsimListener;
 		Id<ShipmentPlanElement> loadId = Id.create(idString, ShipmentPlanElement.class);
 		lspShipment.getLog().addPlanElement(loadId, loggedShipmentLoad);
 	}
+
 
 	private double getCumulatedLoadingTime(Tour tour) {
 		double cumulatedLoadingTime = 0;
@@ -110,6 +140,48 @@ import org.matsim.core.controler.listener.AfterMobsimListener;
 		String idString = transport.getResourceId() + "" + transport.getSolutionElement().getId() + "" + transport.getElementType();
 		Id<ShipmentPlanElement> transportId = Id.create(idString, ShipmentPlanElement.class);
 		lspShipment.getLog().addPlanElement(transportId, transport);
+	}
+
+	/// existing
+
+
+
+	private void logUnload(FreightServiceEndEvent event) {
+		if (servicesOfCarrier.containsKey(event.getCarrierId())) {
+			double startTimeOfService = (double) servicesOfCarrier.get(event.getCarrierId()).get(event.getServiceId());
+			ShipmentUtils.LoggedShipmentUnloadBuilder builder = ShipmentUtils.LoggedShipmentUnloadBuilder.newInstance();
+			builder.setStartTime(startTimeOfService);
+			builder.setEndTime(event.getTime());
+			builder.setLogisticsSolutionElement(solutionElement);
+			builder.setResourceId(resource.getId());
+			builder.setCarrierId(event.getCarrierId());
+			ShipmentPlanElement unload = builder.build();
+			String idString = unload.getResourceId() + "" + unload.getSolutionElement().getId() + "" + unload.getElementType();
+			Id<ShipmentPlanElement> unloadId = Id.create(idString, ShipmentPlanElement.class);
+			lspShipment.getLog().addPlanElement(unloadId, unload);
+		}
+	}
+
+	private void logTransport(FreightServiceEndEvent event) {
+		if (servicesOfCarrier.containsKey(event.getCarrierId())) {
+			String idString = resource.getId() + "" + solutionElement.getId() + "" + "TRANSPORT";
+			Id<ShipmentPlanElement> id = Id.create(idString, ShipmentPlanElement.class);
+			ShipmentPlanElement abstractPlanElement = lspShipment.getLog().getPlanElements().get(id);
+			if (abstractPlanElement instanceof ShipmentLeg transport) {
+				transport.setEndTime(event.getTime());
+				transport.setToLinkId(event.getLinkId());
+			}
+		}
+	}
+
+	private double getTotalUnloadingTime(Tour tour) {
+		double totalTime = 0;
+		for (TourElement element : tour.getTourElements()) {
+			if (element instanceof ServiceActivity serviceActivity) {
+				totalTime = totalTime + serviceActivity.getDuration();
+			}
+		}
+		return totalTime;
 	}
 
 
@@ -139,4 +211,5 @@ import org.matsim.core.controler.listener.AfterMobsimListener;
 
 	@Override public void notifyAfterMobsim( AfterMobsimEvent event ){
 	}
+
 }

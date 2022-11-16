@@ -233,8 +233,7 @@ import java.util.*;
 							addShipmentLoadElement(tuple, tour, serviceActivity);
 							addShipmentTransportElement(tuple, tour, serviceActivity);
 							addShipmentUnloadElement(tuple, tour, serviceActivity);
-							addMainTourRunStartEventHandler(pair.service, tuple, resource, tour);
-							addMainRunTourEndEventHandler(pair.service, tuple, resource, tour);
+							addMainRunEventHandler(pair.service, tuple, resource, tour);
 							//break outerLoop;
 						}
 					}
@@ -321,20 +320,10 @@ import java.util.*;
 		tuple.getShipment().getShipmentPlan().addPlanElement(id, unload);
 	}
 
-	private void addMainTourRunStartEventHandler(CarrierService carrierService, ShipmentWithTime tuple, LSPCarrierResource resource, Tour tour) {
+	private void addMainRunEventHandler(CarrierService carrierService, ShipmentWithTime tuple, LSPCarrierResource resource, Tour tour) {
 		for (LogisticsSolutionElement element : this.resource.getClientElements()) {
 			if (element.getIncomingShipments().getShipments().contains(tuple)) {
-				MainRunTourStartEventHandler handler = new MainRunTourStartEventHandler(tuple.getShipment(), carrierService, element, resource, tour);
-				tuple.getShipment().addSimulationTracker(handler);
-				break;
-			}
-		}
-	}
-
-	private void addMainRunTourEndEventHandler(CarrierService carrierService, ShipmentWithTime tuple, LSPCarrierResource resource, Tour tour) {
-		for (LogisticsSolutionElement element : this.resource.getClientElements()) {
-			if (element.getIncomingShipments().getShipments().contains(tuple)) {
-				MainRunTourEndEventHandler handler = new MainRunTourEndEventHandler(tuple.getShipment(), carrierService, element, resource, tour);
+				MainRunEventHandler handler = new MainRunEventHandler(tuple.getShipment(), carrierService, element, resource, tour);
 				tuple.getShipment().addSimulationTracker(handler);
 				break;
 			}
