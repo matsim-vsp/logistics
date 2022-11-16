@@ -38,7 +38,7 @@ import java.util.ArrayList;
 	private final double capacityNeedLinear;
 	private final double capacityNeedFixed;
 	private TransshipmentHub transshipmentHub;
-	private TransshipmentHubTourEndEventHandler eventHandler;
+	private TransshipmentHubEventHandler eventHandler;
 
 	TransshipmentHubScheduler(UsecaseUtils.TranshipmentHubSchedulerBuilder builder) {
 		this.shipments = new ArrayList<>();
@@ -108,7 +108,7 @@ import java.util.ArrayList;
 		this.transshipmentHub = transshipmentHub;
 	}
 
-	public void setEventHandler(TransshipmentHubTourEndEventHandler eventHandler) {
+	public void setEventHandler(TransshipmentHubEventHandler eventHandler) {
 		this.eventHandler = eventHandler;
 	}
 
