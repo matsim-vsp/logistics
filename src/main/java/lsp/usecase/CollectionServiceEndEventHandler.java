@@ -65,7 +65,7 @@ class CollectionServiceEndEventHandler implements AfterMobsimListener, FreightSe
 	public void handleEvent(FreightServiceEndEvent event) {
 		if (event.getServiceId() == carrierService.getId() && event.getCarrierId() == resource.getCarrier().getId()) {
 			logLoad(event);
-			logTransport(event);
+			logTransport_beginOfTransport(event);
 		}
 	}
 
@@ -83,7 +83,18 @@ class CollectionServiceEndEventHandler implements AfterMobsimListener, FreightSe
 		lspShipment.getLog().addPlanElement(loadId, loggedShipmentLoad);
 	}
 
-	private void logTransport(FreightServiceEndEvent event) {
+	/**
+	 * The information of the transportations end, will be added in {@link CollectionTourEndEventHandler}
+	 * <p>
+	 * This goes, because for collection the goods are brought to the hub/depot (Service-based approach)
+	 * --> The service-activity is the collection of the good (loading in)
+	 * <p>
+	 * <b>Note:</b> This can be totally different, once we are using Shipments instead inside the carrier.
+	 * --> As soon we are doing that, we should have pickup and drop-off activities, and therefore the corresponding events.
+	 *
+	 * @param event
+	 */
+	private void logTransport_beginOfTransport(FreightServiceEndEvent event) {
 		ShipmentUtils.LoggedShipmentTransportBuilder builder = ShipmentUtils.LoggedShipmentTransportBuilder.newInstance();
 		builder.setStartTime(event.getTime());
 		builder.setLogisticsSolutionElement(solutionElement);

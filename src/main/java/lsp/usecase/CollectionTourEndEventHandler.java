@@ -67,7 +67,7 @@ import org.matsim.core.controler.listener.AfterMobsimListener;
 			for (TourElement element : tour.getTourElements()) {
 				if (element instanceof ServiceActivity serviceActivity) {
 					if (serviceActivity.getService().getId() == carrierService.getId() && event.getCarrierId() == resource.getCarrier().getId()) {
-						logTransport(event, tour);
+						logTransport_addEndInformation(event, tour);
 						logUnload(event, tour);
 					}
 				}
@@ -88,7 +88,19 @@ import org.matsim.core.controler.listener.AfterMobsimListener;
 		lspShipment.getLog().addPlanElement(unloadId, unload);
 	}
 
-	private void logTransport(FreightTourEndEvent event, Tour tour) {
+	/**
+	 * This will end the endTime and the ToLink to the shipments logged planElement.
+	 * <p>
+	 * This goes, because for collection the goods are brought to the hub/depot (Service-based approach)
+	 * --> With the tour end, the transport ends.
+	 * <p>
+	 * <b>Note:</b> This can be totally different, once we are using Shipments instead inside the carrier.
+	 * --> As soon we are doing that, we should have pickup and drop-off activities, and therefore the corresponding events.
+	 *
+	 * @param event
+	 * @param tour
+	 */
+	private void logTransport_addEndInformation(FreightTourEndEvent event, Tour tour) {
 		String idString = resource.getId() + "" + solutionElement.getId() + "" + "TRANSPORT";
 		Id<ShipmentPlanElement> id = Id.create(idString, ShipmentPlanElement.class);
 		ShipmentPlanElement abstractPlanElement = lspShipment.getLog().getPlanElements().get(id);
