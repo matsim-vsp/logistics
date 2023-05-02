@@ -2,6 +2,7 @@ package lsp;
 
 public abstract class LSPConstants {
 
+    static final String LSPS_DEFINITIONS = "lspsDefinitions";
 	static final String LSPS = "LSPs";
     static final String LSP = "lsp";
         static final String HUB = "hub";
@@ -20,6 +21,7 @@ public abstract class LSPConstants {
                 static final String TYPE_ID = "typeId";
                 static final String VEHICLE_EARLIEST_START = "earliestStart";
                 static final String VEHICLE_LATEST_END = "latestEnd";
+        static final String SHIPMENTS = "shipments";
         static final String SHIPMENT = "shipment";
             static final String ID = "id";
             static final String FROM = "from";
@@ -31,16 +33,19 @@ public abstract class LSPConstants {
             static final String END_DELIVERY = "endDelivery";
             static final String PICKUP_SERVICE_TIME = "pickupServiceTime";
             static final String DELIVERY_SERVICE_TIME = "deliveryServiceTime";
+        static final String LSP_PLANS = "LSPPlans";
         static final String PLAN = "plan";
             static final String SCORE = "score";
-            static final String CHAIN_ID = "chainId";
-            static final String SELECTED = "selected";
+    static final String SELECTED = "selected";
             static final String RESOURCES = "resources";
             static final String RESOURCE = "resource";
+    static final String LOGISTIC_CHAINS = "logisticChains";
+            static final String LOGISTIC_CHAIN = "logisticChain";
+            static final String LOGISTIC_CHAIN_ELEMENT = "logisticChainElement";
+            static final String SHIPMENT_PLANS = "shipmentPlans";
             static final String SHIPMENT_PLAN = "shipmentPlan";
                 static final String SHIPMENT_ID = "shipmentId";
                 static final String ELEMENT = "element";
-                    static final String ELEMENT_ID = "id";
                     static final String TYPE = "type";
                     static final String START_TIME = "startTime";
                     static final String END_TIME = "endTime";

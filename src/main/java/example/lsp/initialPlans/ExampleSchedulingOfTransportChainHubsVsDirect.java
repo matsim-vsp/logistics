@@ -34,7 +34,7 @@ import org.matsim.contrib.freight.FreightConfigGroup;
 import org.matsim.contrib.freight.carrier.*;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
 import org.matsim.contrib.freight.controler.CarrierStrategyManager;
-import org.matsim.contrib.freight.controler.CarrierStrategyManagerImpl;
+import org.matsim.contrib.freight.controler.FreightUtils;
 import org.matsim.contrib.freight.events.FreightServiceEndEvent;
 import org.matsim.contrib.freight.events.FreightTourEndEvent;
 import org.matsim.contrib.freight.events.eventhandler.FreightServiceEndEventHandler;
@@ -146,7 +146,7 @@ import java.util.*;
 					return strategyManager;
 				});
 				bind( CarrierStrategyManager.class ).toProvider(() -> {
-					CarrierStrategyManager strategyManager = new CarrierStrategyManagerImpl();
+					CarrierStrategyManager strategyManager = FreightUtils.createDefaultCarrierStrategyManager();
 					strategyManager.addStrategy(new GenericPlanStrategyImpl<>(new RandomPlanSelector<>()), null, 1);
 					return strategyManager;
 				});
@@ -230,13 +230,12 @@ import java.util.*;
 							.build());
 
 			//The scheduler for the main run Resource is created and added to the Resource
-			LSPResource mainRunResource = UsecaseUtils.MainRunCarrierResourceBuilder.newInstance(
-							Id.create("MainRunResource", LSPResource.class), network)
+			LSPResource mainRunResource = UsecaseUtils.MainRunCarrierResourceBuilder.newInstance(mainRunCarrier, network)
 					.setFromLinkId(depotLinkId)
 					.setToLinkId(hubLinkId)
-					.setCarrier(mainRunCarrier)
 					.setMainRunCarrierScheduler(UsecaseUtils.createDefaultMainRunCarrierScheduler())
 					.build();
+
 			mainRunElement = LSPUtils.LogisticChainElementBuilder.newInstance(Id.create("MainRunElement", LogisticChainElement.class))
 					.setResource(mainRunResource)
 					.build();
@@ -283,9 +282,8 @@ import java.util.*;
 							.build());
 
 			//The distribution adapter i.e. the Resource is created
-			LSPResource distributionResource = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(
-							Id.create("DistributionCarrierResource", LSPResource.class), network)
-					.setCarrier(distributionCarrier).setLocationLinkId(hubLinkId)
+			LSPResource distributionResource = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(distributionCarrier, network)
+					.setLocationLinkId(hubLinkId)
 					.setDistributionScheduler(UsecaseUtils.createDefaultDistributionCarrierScheduler())
 					.build();
 			// (The scheduler is where jsprit comes into play.)
@@ -318,9 +316,8 @@ import java.util.*;
 			directDistributionCarrier.setCarrierCapabilities(directDistributionCarrierCapabilities);
 
 			//The distribution adapter i.e. the Resource is created
-			LSPResource directDistributionResource = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(
-							Id.create("DirectDistributionCarrierResource", LSPResource.class), network)
-					.setCarrier(directDistributionCarrier).setLocationLinkId(depotLinkId)
+			LSPResource directDistributionResource = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(directDistributionCarrier, network)
+					.setLocationLinkId(depotLinkId)
 					.setDistributionScheduler(UsecaseUtils.createDefaultDistributionCarrierScheduler())
 					.build();
 			// (The scheduler is where jsprit comes into play.)
