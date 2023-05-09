@@ -212,7 +212,7 @@ import java.util.*;
 		}
 	}
 
-	private void updateSchedule(ShipmentWithTime tuple) {
+	private void updateSchedule(LspShipmentWithTime tuple) {
 		//outerLoop:
 		for (ScheduledTour scheduledTour : carrier.getSelectedPlan().getScheduledTours()) {
 			Tour tour = scheduledTour.getTour();
@@ -312,7 +312,7 @@ import java.util.*;
 	}
 
 	private void addMainRunEventHandler(CarrierService carrierService, LspShipmentWithTime tuple, LSPCarrierResource resource, Tour tour) {
-		for (LogisticsSolutionElement element : this.resource.getClientElements()) {
+		for (LogisticChainElement element : this.resource.getClientElements()) {
 			if (element.getIncomingShipments().getShipments().contains(tuple)) {
 				MainRunEventHandler handler = new MainRunEventHandler(tuple.getShipment(), carrierService, element, resource, tour);
 				tuple.getShipment().addSimulationTracker(handler);

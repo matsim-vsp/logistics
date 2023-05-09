@@ -109,8 +109,8 @@ public class ExampleTwoChains {
 		for (LSP lsp : LSPUtils.getLSPs(controler.getScenario()).getLSPs().values()) {
 			UsecaseUtils.printScores(controler.getControlerIO().getOutputPath(), lsp);
 			UsecaseUtils.printShipmentsOfLSP(controler.getControlerIO().getOutputPath(), lsp);
-			UsecaseUtils.printResults_shipmentPlan(controler.getControlerIO().getOutputPath(), lsp);
-			UsecaseUtils.printResults_shipmentLog(controler.getControlerIO().getOutputPath(), lsp);
+			UsecaseUtils.writeShipmentPlanToFile(controler.getControlerIO().getOutputPath(), lsp);
+			UsecaseUtils.writeShipmentLogToFile(controler.getControlerIO().getOutputPath(), lsp);
 		}
 		log.info("Done.");
 	}

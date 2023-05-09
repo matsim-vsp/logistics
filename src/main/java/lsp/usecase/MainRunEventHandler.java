@@ -155,11 +155,11 @@ import java.util.LinkedHashMap;
 			ShipmentUtils.LoggedShipmentUnloadBuilder builder = ShipmentUtils.LoggedShipmentUnloadBuilder.newInstance();
 			builder.setStartTime(startTimeOfService);
 			builder.setEndTime(event.getTime());
-			builder.setLogisticsSolutionElement(solutionElement);
+			builder.setLogisticChainElement(logisticChainElement);
 			builder.setResourceId(resource.getId());
 			builder.setCarrierId(event.getCarrierId());
 			ShipmentPlanElement unload = builder.build();
-			String idString = unload.getResourceId() + "" + unload.getSolutionElement().getId() + "" + unload.getElementType();
+			String idString = unload.getResourceId() + "" + unload.getLogisticChainElement().getId() + "" + unload.getElementType();
 			Id<ShipmentPlanElement> unloadId = Id.create(idString, ShipmentPlanElement.class);
 			lspShipment.getLog().addPlanElement(unloadId, unload);
 		}
@@ -167,7 +167,7 @@ import java.util.LinkedHashMap;
 
 	private void logTransport_addEndInformation(FreightServiceEndEvent event) {
 		if (servicesOfCarrier.containsKey(event.getCarrierId())) {
-			String idString = resource.getId() + "" + solutionElement.getId() + "" + "TRANSPORT";
+			String idString = resource.getId() + "" + logisticChainElement.getId() + "" + "TRANSPORT";
 			Id<ShipmentPlanElement> id = Id.create(idString, ShipmentPlanElement.class);
 			ShipmentPlanElement abstractPlanElement = lspShipment.getLog().getPlanElements().get(id);
 			if (abstractPlanElement instanceof ShipmentLeg transport) {
