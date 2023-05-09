@@ -24,6 +24,7 @@ import lsp.*;
 import lsp.shipment.LSPShipment;
 import lsp.shipment.ShipmentUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -34,15 +35,15 @@ import org.matsim.contrib.freight.carrier.*;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.VehicleType;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
+import java.util.*;
 
 import static lsp.usecase.UsecaseUtils.*;
 import static org.junit.Assert.assertEquals;
@@ -50,6 +51,8 @@ import static org.junit.Assert.assertTrue;
 
 public class CollectionLSPScoringTest {
 
+	@Rule
+	public final MatsimTestUtils utils = new MatsimTestUtils();
 	private final int numberOfShipments = 25;
 	private LSP collectionLSP;
 
@@ -75,18 +78,18 @@ public class CollectionLSPScoringTest {
 		Carrier carrier = CarrierUtils.createCarrier(Id.create("CollectionCarrier", Carrier.class));
 		carrier.setCarrierCapabilities(CarrierCapabilities.Builder.newInstance().addType(collectionVehicleType).addVehicle(carrierVehicle).setFleetSize(FleetSize.INFINITE).build());
 
-		LSPResource collectionResource = CollectionCarrierResourceBuilder.newInstance(Id.create("CollectionCarrierResource", LSPResource.class), network)
-				.setCollectionScheduler(createDefaultCollectionCarrierScheduler()).setCarrier(carrier).setLocationLinkId(collectionLink.getId()).build();
+		LSPResource collectionResource = CollectionCarrierResourceBuilder.newInstance(carrier, network)
+				.setCollectionScheduler(createDefaultCollectionCarrierScheduler()).setLocationLinkId(collectionLink.getId()).build();
 
-		LogisticsSolutionElement collectionElement = LSPUtils.LogisticsSolutionElementBuilder
-				.newInstance(Id.create("CollectionElement", LogisticsSolutionElement.class)).setResource(collectionResource).build();
+		LogisticChainElement collectionElement = LSPUtils.LogisticChainElementBuilder
+				.newInstance(Id.create("CollectionElement", LogisticChainElement.class)).setResource(collectionResource).build();
 
-		LogisticsSolution collectionSolution = LSPUtils.LogisticsSolutionBuilder.newInstance(Id.create("CollectionSolution", LogisticsSolution.class))
-				.addSolutionElement(collectionElement).build();
+		LogisticChain collectionSolution = LSPUtils.LogisticChainBuilder.newInstance(Id.create("CollectionSolution", LogisticChain.class))
+				.addLogisticChainElement(collectionElement).build();
 
 		collectionLSP = LSPUtils.LSPBuilder.getInstance(Id.create("CollectionLSP", LSP.class))
-				.setInitialPlan(LSPUtils.createLSPPlan().setAssigner(createSingleSolutionShipmentAssigner()).addSolution(collectionSolution))
-				.setSolutionScheduler(createDefaultSimpleForwardSolutionScheduler(Collections.singletonList(collectionResource)))
+				.setInitialPlan(LSPUtils.createLSPPlan().setAssigner(createSingleLogisticChainShipmentAssigner()).addLogisticChain(collectionSolution))
+				.setLogisticChainScheduler(createDefaultSimpleForwardLogisticChainScheduler(Collections.singletonList(collectionResource)))
 //				.setSolutionScorer(new ExampleLSPScoring.TipScorer())
 				.build();
 
@@ -101,7 +104,7 @@ public class CollectionLSPScoringTest {
 //		collectionLSP.addSimulationTracker( tipScorer );
 //		collectionLSP.setScorer(tipScorer);
 
-		ArrayList<Link> linkList = new ArrayList<>(network.getLinks().values());
+		List<Link> linkList = new LinkedList<>(network.getLinks().values());
 
 		for (int i = 1; i < (numberOfShipments + 1); i++) {
 			Id<LSPShipment> id = Id.create(i, LSPShipment.class);
@@ -132,7 +135,7 @@ public class CollectionLSPScoringTest {
 			collectionLSP.assignShipmentToLSP(shipment);
 		}
 
-		collectionLSP.scheduleSolutions();
+		collectionLSP.scheduleLogisticChains();
 
 		ArrayList<LSP> lspList = new ArrayList<>();
 		lspList.add(collectionLSP);
@@ -145,14 +148,16 @@ public class CollectionLSPScoringTest {
 		controler.addOverridingModule( new LSPModule() );
 		controler.addOverridingModule( new AbstractModule(){
 			@Override public void install(){
-				bind( LSPScorerFactory.class ).toInstance( ( lsp) -> new ExampleLSPScoring.TipScorer() );
+				bind( LSPScorerFactory.class ).toInstance( () -> new ExampleLSPScoring.TipScorer() );
 			}
 		});
 
 		config.controler().setFirstIteration(0);
 		config.controler().setLastIteration(0);
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
-//		config.network().setInputFile("scenarios/2regions/2regions-network.xml");
+		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controler().setOutputDirectory(utils.getOutputDirectory());
+		//The VSP default settings are designed for person transport simulation. After talking to Kai, they will be set to WARN here. Kai MT may'23
+		controler.getConfig().vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn);
 		controler.run();
 	}
 
@@ -160,7 +165,7 @@ public class CollectionLSPScoringTest {
 	public void testCollectionLSPScoring() {
 		System.out.println(collectionLSP.getSelectedPlan().getScore());
 		assertEquals(numberOfShipments, collectionLSP.getShipments().size());
-		assertEquals(numberOfShipments, collectionLSP.getSelectedPlan().getSolutions().iterator().next().getShipments()
+		assertEquals(numberOfShipments, collectionLSP.getSelectedPlan().getLogisticChains().iterator().next().getShipments()
 				.size());
 		assertTrue(collectionLSP.getSelectedPlan().getScore() > 0);
 		assertTrue(collectionLSP.getSelectedPlan().getScore() <= (numberOfShipments * 5));
@@ -172,4 +177,8 @@ public class CollectionLSPScoringTest {
 		 */
 	}
 
+	@Test
+	public void compareEvents(){
+		MatsimTestUtils.assertEqualEventsFiles(utils.getClassInputDirectory() + "output_events.xml.gz", utils.getOutputDirectory() + "output_events.xml.gz" );
+	}
 }

@@ -71,31 +71,26 @@ import java.util.*;
 	}
 	@Override protected void scheduleResource() {
 		int load = 0;
-		List<ShipmentWithTime> copyOfAssignedShipments = new ArrayList<>(shipments);
-		copyOfAssignedShipments.sort(Comparator.comparingDouble(ShipmentWithTime::getTime));
-		ArrayList<ShipmentWithTime> shipmentsInCurrentTour = new ArrayList<>();
+		List<LspShipmentWithTime> copyOfAssignedShipments = new ArrayList<>(lspShipmentsWithTime);
+		copyOfAssignedShipments.sort(Comparator.comparingDouble(LspShipmentWithTime::getTime));
+		ArrayList<LspShipmentWithTime> shipmentsInCurrentTour = new ArrayList<>();
 //		ArrayList<ScheduledTour> scheduledTours = new ArrayList<>();
 		List<CarrierPlan> scheduledPlans = new LinkedList<>();
 		
-		for (ShipmentWithTime tuple : copyOfAssignedShipments) {
+		for (LspShipmentWithTime tuple : copyOfAssignedShipments) {
 			VehicleType vehicleType = UsecaseUtils.getVehicleTypeCollection(carrier).iterator().next();
-			if ((load + tuple.getShipment().getSize()) <= vehicleType.getCapacity().getOther().intValue()) {
-				shipmentsInCurrentTour.add(tuple);
-				load = load + tuple.getShipment().getSize();
-			} else {
+			if ((load + tuple.getShipment().getSize()) > vehicleType.getCapacity().getOther().intValue()) {
 				load = 0;
 				CarrierPlan plan = createPlan(carrier, shipmentsInCurrentTour);
-//				scheduledTours.addAll(plan.getScheduledTours());
 				scheduledPlans.add(plan);
 				shipmentsInCurrentTour.clear();
-				shipmentsInCurrentTour.add(tuple);
-				load = load + tuple.getShipment().getSize();
 			}
+			shipmentsInCurrentTour.add(tuple);
+			load = load + tuple.getShipment().getSize();
 
 		}
 		if (!shipmentsInCurrentTour.isEmpty()) {
 			CarrierPlan plan = createPlan(carrier, shipmentsInCurrentTour);
-//			scheduledTours.addAll(plan.getScheduledTours());
 			scheduledPlans.add(plan);
 			shipmentsInCurrentTour.clear();
 		}
@@ -110,7 +105,7 @@ import java.util.*;
 	}
 
 	private int tourIdindex = 1; //Have unique TourIds for the MainRun.
-	private CarrierPlan createPlan(Carrier carrier, List<ShipmentWithTime> tuples) {
+	private CarrierPlan createPlan(Carrier carrier, List<LspShipmentWithTime> tuples) {
 
 		//TODO: Allgemein: Hier ist alles manuell zusammen gesetzt; es findet KEINE Tourenplanung statt!
 		NetworkBasedTransportCosts.Builder tpcostsBuilder = NetworkBasedTransportCosts.Builder.newInstance(resource.getNetwork(), UsecaseUtils.getVehicleTypeCollection(resource.getCarrier()));
@@ -124,7 +119,7 @@ import java.util.*;
 		double totalLoadingTime = 0;
 		double latestTupleTime = 0;
 
-		for (ShipmentWithTime tuple : tuples) {
+		for (LspShipmentWithTime tuple : tuples) {
 			totalLoadingTime = totalLoadingTime + tuple.getShipment().getDeliveryServiceTime();
 			if (tuple.getTime() > latestTupleTime) {
 				latestTupleTime = tuple.getTime();
@@ -136,14 +131,10 @@ import java.util.*;
 
 		tourBuilder.addLeg(new Leg());
 		switch (resource.getVehicleReturn()) {
-			case returnToFromLink -> {
-				//The more "urban" behaviour: The vehicle returns to its origin (startLink).
-				tourBuilder.scheduleEnd(Id.create(resource.getStartLinkId(), Link.class));
-			}
-			case endAtToLink -> {
-				//The more "long-distance" behaviour: The vehicle ends at its destination (toLink).
-				tourBuilder.scheduleEnd(Id.create(resource.getEndLinkId(), Link.class));
-			}
+			case returnToFromLink -> //The more "urban" behaviour: The vehicle returns to its origin (startLink).
+					tourBuilder.scheduleEnd(Id.create(resource.getStartLinkId(), Link.class));
+			case endAtToLink -> //The more "long-distance" behaviour: The vehicle ends at its destination (toLink).
+					tourBuilder.scheduleEnd(Id.create(resource.getEndLinkId(), Link.class));
 			default -> throw new IllegalStateException("Unexpected value: " + resource.getVehicleReturn());
 		}
 		org.matsim.contrib.freight.carrier.Tour vehicleTour = tourBuilder.build();
@@ -205,7 +196,7 @@ import java.util.*;
 		return (-score); //negative, because we are looking at "costs" instead of "utility"
 	}
 
-	private CarrierService convertToCarrierService(ShipmentWithTime tuple) {
+	private CarrierService convertToCarrierService(LspShipmentWithTime tuple) {
 		Id<CarrierService> serviceId = Id.create(tuple.getShipment().getId().toString(), CarrierService.class);
 		CarrierService.Builder builder = CarrierService.Builder.newInstance(serviceId, resource.getEndLinkId());
 		builder.setCapacityDemand(tuple.getShipment().getSize());
@@ -216,7 +207,7 @@ import java.util.*;
 	}
 	
 	@Override protected void updateShipments() {
-		for (ShipmentWithTime tuple : shipments) {
+		for (LspShipmentWithTime tuple : lspShipmentsWithTime) {
 			updateSchedule(tuple);
 		}
 	}
@@ -242,12 +233,12 @@ import java.util.*;
 		}
 	}
 
-	private void addShipmentLoadElement(ShipmentWithTime tuple, Tour tour, Tour.ServiceActivity serviceActivity) {
+	private void addShipmentLoadElement(LspShipmentWithTime tuple, Tour tour, Tour.ServiceActivity serviceActivity) {
 		ShipmentUtils.ScheduledShipmentLoadBuilder builder = ShipmentUtils.ScheduledShipmentLoadBuilder.newInstance();
 		builder.setResourceId(resource.getId());
-		for (LogisticsSolutionElement element : resource.getClientElements()) {
+		for (LogisticChainElement element : resource.getClientElements()) {
 			if (element.getIncomingShipments().getShipments().contains(tuple)) {
-				builder.setLogisticsSolutionElement(element);
+				builder.setLogisticChainElement(element);
 			}
 		}
 		int startIndex = tour.getTourElements().indexOf(tour.getTourElements().indexOf(tour.getStart()));
@@ -265,17 +256,17 @@ import java.util.*;
 		builder.setLinkId(tour.getStartLinkId());
 		builder.setCarrierService(serviceActivity.getService());
 		ShipmentPlanElement load = builder.build();
-		String idString = load.getResourceId() + "" + load.getSolutionElement().getId() + "" + load.getElementType();
+		String idString = load.getResourceId() + "" + load.getLogisticChainElement().getId() + "" + load.getElementType();
 		Id<ShipmentPlanElement> id = Id.create(idString, ShipmentPlanElement.class);
 		tuple.getShipment().getShipmentPlan().addPlanElement(id, load);
 	}
 
-	private void addShipmentTransportElement(ShipmentWithTime tuple, Tour tour, Tour.ServiceActivity serviceActivity) {
+	private void addShipmentTransportElement(LspShipmentWithTime tuple, Tour tour, Tour.ServiceActivity serviceActivity) {
 		ShipmentUtils.ScheduledShipmentTransportBuilder builder = ShipmentUtils.ScheduledShipmentTransportBuilder.newInstance();
 		builder.setResourceId(resource.getId());
-		for (LogisticsSolutionElement element : resource.getClientElements()) {
+		for (LogisticChainElement element : resource.getClientElements()) {
 			if (element.getIncomingShipments().getShipments().contains(tuple)) {
-				builder.setLogisticsSolutionElement(element);
+				builder.setLogisticChainElement(element);
 			}
 		}
 		int startIndex = tour.getTourElements().indexOf(tour.getTourElements().indexOf(tour.getStart()));
@@ -288,17 +279,17 @@ import java.util.*;
 		builder.setToLinkId(tour.getEndLinkId());
 		builder.setCarrierService(serviceActivity.getService());
 		ShipmentPlanElement transport = builder.build();
-		String idString = transport.getResourceId() + "" + transport.getSolutionElement().getId() + "" + transport.getElementType();
+		String idString = transport.getResourceId() + "" + transport.getLogisticChainElement().getId() + "" + transport.getElementType();
 		Id<ShipmentPlanElement> id = Id.create(idString, ShipmentPlanElement.class);
 		tuple.getShipment().getShipmentPlan().addPlanElement(id, transport);
 	}
 
-	private void addShipmentUnloadElement(ShipmentWithTime tuple, Tour tour, Tour.ServiceActivity serviceActivity) {
+	private void addShipmentUnloadElement(LspShipmentWithTime tuple, Tour tour, Tour.ServiceActivity serviceActivity) {
 		ShipmentUtils.ScheduledShipmentUnloadBuilder builder = ShipmentUtils.ScheduledShipmentUnloadBuilder.newInstance();
 		builder.setResourceId(resource.getId());
-		for (LogisticsSolutionElement element : resource.getClientElements()) {
+		for (LogisticChainElement element : resource.getClientElements()) {
 			if (element.getIncomingShipments().getShipments().contains(tuple)) {
-				builder.setLogisticsSolutionElement(element);
+				builder.setLogisticsChainElement(element);
 			}
 		}
 		double cumulatedLoadingTime = 0;
@@ -315,12 +306,12 @@ import java.util.*;
 		builder.setLinkId(tour.getEndLinkId());
 		builder.setCarrierService(serviceActivity.getService());
 		ShipmentPlanElement unload = builder.build();
-		String idString = unload.getResourceId() + "" + unload.getSolutionElement().getId() + "" + unload.getElementType();
+		String idString = unload.getResourceId() + "" + unload.getLogisticChainElement().getId() + "" + unload.getElementType();
 		Id<ShipmentPlanElement> id = Id.create(idString, ShipmentPlanElement.class);
 		tuple.getShipment().getShipmentPlan().addPlanElement(id, unload);
 	}
 
-	private void addMainRunEventHandler(CarrierService carrierService, ShipmentWithTime tuple, LSPCarrierResource resource, Tour tour) {
+	private void addMainRunEventHandler(CarrierService carrierService, LspShipmentWithTime tuple, LSPCarrierResource resource, Tour tour) {
 		for (LogisticsSolutionElement element : this.resource.getClientElements()) {
 			if (element.getIncomingShipments().getShipments().contains(tuple)) {
 				MainRunEventHandler handler = new MainRunEventHandler(tuple.getShipment(), carrierService, element, resource, tour);
@@ -330,13 +321,6 @@ import java.util.*;
 		}
 	}
 
-	static class LSPCarrierPair {
-		private final ShipmentWithTime tuple;
-		private final CarrierService service;
-
-		public LSPCarrierPair(ShipmentWithTime tuple, CarrierService service) {
-			this.tuple = tuple;
-			this.service = service;
-		}
+	private record LSPCarrierPair(LspShipmentWithTime tuple, CarrierService service) {
 	}
 }

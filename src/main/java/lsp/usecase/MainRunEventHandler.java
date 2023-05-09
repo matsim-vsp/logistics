@@ -22,7 +22,7 @@ package lsp.usecase;
 
 import lsp.LSPCarrierResource;
 import lsp.LSPSimulationTracker;
-import lsp.LogisticsSolutionElement;
+import lsp.LogisticChainElement;
 import lsp.shipment.LSPShipment;
 import lsp.shipment.ShipmentLeg;
 import lsp.shipment.ShipmentPlanElement;
@@ -48,7 +48,7 @@ import java.util.LinkedHashMap;
 /*package-private*/ class MainRunEventHandler implements AfterMobsimListener, FreightTourStartEventHandler, FreightServiceStartEventHandler, FreightServiceEndEventHandler, LSPSimulationTracker<LSPShipment> {
 
 	private final CarrierService carrierService;
-	private final LogisticsSolutionElement solutionElement;
+	private final LogisticChainElement logisticChainElement;
 	private final LSPCarrierResource resource;
 	private LSPShipment lspShipment;
 	private final Tour tour;
@@ -57,10 +57,10 @@ import java.util.LinkedHashMap;
 	HashMap<Id<Carrier>, HashMap > servicesOfCarrier = new LinkedHashMap<>();
 	HashMap<Id<CarrierService>, Double> timeOfServiceStart = new LinkedHashMap<>();
 
-	MainRunEventHandler(LSPShipment lspShipment, CarrierService carrierService, LogisticsSolutionElement solutionElement, LSPCarrierResource resource, Tour tour) {
+	MainRunEventHandler(LSPShipment lspShipment, CarrierService carrierService, LogisticChainElement logisticChainElement, LSPCarrierResource resource, Tour tour) {
 		this.lspShipment = lspShipment;
 		this.carrierService = carrierService;
-		this.solutionElement = solutionElement;
+		this.logisticChainElement = logisticChainElement;
 		this.resource = resource;
 		this.tour = tour;
 	}
@@ -112,10 +112,10 @@ import java.util.LinkedHashMap;
 		builder.setLinkId(event.getLinkId());
 		builder.setStartTime(event.getTime() - getCumulatedLoadingTime(tour));
 		builder.setEndTime(event.getTime());
-		builder.setLogisticsSolutionElement(solutionElement);
+		builder.setLogisticsChainElement(logisticChainElement);
 		builder.setResourceId(resource.getId());
 		ShipmentPlanElement loggedShipmentLoad = builder.build();
-		String idString = loggedShipmentLoad.getResourceId() + "" + loggedShipmentLoad.getSolutionElement().getId() + "" + loggedShipmentLoad.getElementType();
+		String idString = loggedShipmentLoad.getResourceId() + "" + loggedShipmentLoad.getLogisticChainElement().getId() + "" + loggedShipmentLoad.getElementType();
 		Id<ShipmentPlanElement> loadId = Id.create(idString, ShipmentPlanElement.class);
 		lspShipment.getLog().addPlanElement(loadId, loggedShipmentLoad);
 	}
@@ -137,10 +137,10 @@ import java.util.LinkedHashMap;
 		builder.setFromLinkId(event.getLinkId());
 		builder.setToLinkId(tour.getEndLinkId());
 		builder.setStartTime(event.getTime());
-		builder.setLogisticsSolutionElement(solutionElement);
+		builder.setLogisticChainElement(logisticChainElement);
 		builder.setResourceId(resource.getId());
 		ShipmentLeg transport = builder.build();
-		String idString = transport.getResourceId() + "" + transport.getSolutionElement().getId() + "" + transport.getElementType();
+		String idString = transport.getResourceId() + "" + transport.getLogisticChainElement().getId() + "" + transport.getElementType();
 		Id<ShipmentPlanElement> transportId = Id.create(idString, ShipmentPlanElement.class);
 		lspShipment.getLog().addPlanElement(transportId, transport);
 	}
@@ -198,8 +198,8 @@ import java.util.LinkedHashMap;
 	}
 
 
-	public LogisticsSolutionElement getSolutionElement() {
-		return solutionElement;
+	public LogisticChainElement getLogisticChainElement() {
+		return logisticChainElement;
 	}
 
 

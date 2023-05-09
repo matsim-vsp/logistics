@@ -34,10 +34,11 @@ import org.matsim.contrib.freight.FreightConfigGroup;
 import org.matsim.contrib.freight.carrier.*;
 import org.matsim.contrib.freight.controler.CarrierScoringFunctionFactory;
 import org.matsim.contrib.freight.controler.CarrierStrategyManager;
-import org.matsim.contrib.freight.controler.CarrierStrategyManagerImpl;
+import org.matsim.contrib.freight.controler.FreightUtils;
 import org.matsim.core.config.CommandLine;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -70,26 +71,38 @@ import java.util.*;
  */
 final class ExampleTwoEchelonGrid {
 
+	//Run Settings
+	static final double HUBCOSTS_FIX = 100;
+	private static final DemandSetting demandSetting = DemandSetting.tenCustomers;
+	private static final CarrierCostSetting costSetting = CarrierCostSetting.lowerCost4LastMile;
+	private static final double TOLL_VALUE = 1000;
+
+
 	private static final Logger log = LogManager.getLogger(ExampleTwoEchelonGrid.class);
+
 	private static final Id<Link> DEPOT_LINK_ID = Id.createLinkId("i(5,0)");
 	private static final Id<Link> HUB_LINK_ID = Id.createLinkId("j(5,3)");
 
-	private static final VehicleType VEH_TYPE_LARGE_10 = CarrierVehicleType.Builder.newInstance(Id.create("large10", VehicleType.class))
-			.setCapacity(10)
+	enum DemandSetting {oneCustomer, tenCustomers}
+	enum CarrierCostSetting {sameCost, lowerCost4LastMile}
+
+
+	private static final VehicleType VEH_TYPE_LARGE_50 = CarrierVehicleType.Builder.newInstance(Id.create("large50", VehicleType.class))
+			.setCapacity(50)
 			.setMaxVelocity(10)
 			.setFixCost(150)
 			.setCostPerDistanceUnit(0.01)
 			.setCostPerTimeUnit(0.01)
 			.build();
 
-	private static final VehicleType VEH_TYPE_SMALL_02 = CarrierVehicleType.Builder.newInstance(Id.create("small02", VehicleType.class))
-			.setCapacity(2)
+	private static final VehicleType VEH_TYPE_SMALL_05 = CarrierVehicleType.Builder.newInstance(Id.create("small05", VehicleType.class))
+			.setCapacity(5)
 			.setMaxVelocity(10)
 			.setFixCost(25)
 			.setCostPerDistanceUnit(0.001)
 			.setCostPerTimeUnit(0.005)
 			.build();
-	public static final double HUBCOSTS_FIX = -100.;
+
 
 	private ExampleTwoEchelonGrid() {
 	} // so it cannot be instantiated
@@ -109,11 +122,16 @@ final class ExampleTwoEchelonGrid {
 				install(new LSPModule());
 			}
 		});
+
 		controler.addOverridingModule( new AbstractModule(){
 			@Override public void install(){
-				bind( CarrierScoringFunctionFactory.class ).toInstance( new MyCarrierScorer());
+//				bind( CarrierScoringFunctionFactory.class ).toInstance( new MyCarrierScorer());
+				final MyEventBasedCarrierScorer carrierScorer = new MyEventBasedCarrierScorer();
+				carrierScorer.setToll(TOLL_VALUE);
+
+				bind( CarrierScoringFunctionFactory.class ).toInstance(carrierScorer);
 				bind( CarrierStrategyManager.class ).toProvider(() -> {
-					CarrierStrategyManager strategyManager = new CarrierStrategyManagerImpl();
+					CarrierStrategyManager strategyManager = FreightUtils.createDefaultCarrierStrategyManager();
 					strategyManager.addStrategy(new GenericPlanStrategyImpl<>(new BestPlanSelector<>()), null, 1);
 					return strategyManager;
 				});
@@ -122,18 +140,24 @@ final class ExampleTwoEchelonGrid {
 					strategyManager.addStrategy(new GenericPlanStrategyImpl<>(new BestPlanSelector<>()), null, 1);
 					return strategyManager;
 				});
-				bind( LSPScorerFactory.class ).toInstance( ( lsp) -> new MyLSPScorer() );
+				bind( LSPScorerFactory.class ).toInstance( () -> new MyLSPScorer() );
 			}
 		} );
 
 		log.info("Run MATSim");
+		log.warn("Runs settings were: Demand: "  + demandSetting +  "\n CarrierCosts: "  + costSetting  + "\n HubCosts: "  + HUBCOSTS_FIX + "\n tollValue: "  + TOLL_VALUE);
+
+		//The VSP default settings are designed for person transport simulation. After talking to Kai, they will be set to WARN here. Kai MT may'23
+		controler.getConfig().vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn);
 		controler.run();
 
 		log.info("Some results ....");
-		printScores(LSPUtils.getLSPs(controler.getScenario()).getLSPs().values());
+
 		for (LSP lsp : LSPUtils.getLSPs(controler.getScenario()).getLSPs().values()) {
-			UsecaseUtils.writeShipmentPlanToFile(controler.getControlerIO().getOutputPath(), lsp);
-			UsecaseUtils.writeShipmentLogToFile(controler.getControlerIO().getOutputPath(), lsp);
+			UsecaseUtils.printScores(controler.getControlerIO().getOutputPath(), lsp);
+			UsecaseUtils.printShipmentsOfLSP(controler.getControlerIO().getOutputPath(), lsp);
+			UsecaseUtils.printResults_shipmentPlan(controler.getControlerIO().getOutputPath(), lsp);
+			UsecaseUtils.printResults_shipmentLog(controler.getControlerIO().getOutputPath(), lsp);
 		}
 		log.info("Done.");
 	}
@@ -148,7 +172,7 @@ final class ExampleTwoEchelonGrid {
 
 			CommandLine cmd = ConfigUtils.getCommandLine(args);
 		} else {
-			config.controler().setOutputDirectory("output/2echelon/");
+			config.controler().setOutputDirectory("output/2echelon_"+demandSetting +  "_"  + costSetting  + "_"  + HUBCOSTS_FIX+ "_"  + TOLL_VALUE);
 			config.controler().setLastIteration(2);
 		}
 
@@ -168,6 +192,7 @@ final class ExampleTwoEchelonGrid {
 		//Change speed on all links to 30 km/h (8.33333 m/s) for easier computation --> Freeflow TT per link is 2min
 		for (Link link : scenario.getNetwork().getLinks().values()) {
 			link.setFreespeed(30 / 3.6);
+			link.setCapacity(1000);
 		}
 
 		log.info("Add LSP to the scenario");
@@ -187,24 +212,23 @@ final class ExampleTwoEchelonGrid {
 			Carrier directCarrier = CarrierUtils.createCarrier(Id.create("directCarrier", Carrier.class));
 			directCarrier.getCarrierCapabilities().setFleetSize(CarrierCapabilities.FleetSize.INFINITE);
 
-			CarrierUtils.addCarrierVehicle(directCarrier, CarrierVehicle.newInstance(Id.createVehicleId("directTruck"), DEPOT_LINK_ID, VEH_TYPE_LARGE_10));
-			LSPResource directCarrierRessource = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(Id.create("directCarrierRes", LSPResource.class), network)
-					.setCarrier(directCarrier)
+			CarrierUtils.addCarrierVehicle(directCarrier, CarrierVehicle.newInstance(Id.createVehicleId("directTruck"), DEPOT_LINK_ID, VEH_TYPE_LARGE_50));
+			LSPResource directCarrierRessource = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(directCarrier, network)
 					.setDistributionScheduler(UsecaseUtils.createDefaultDistributionCarrierScheduler())
 					.build();
 
-			LogisticsSolutionElement directCarrierElement = LSPUtils.LogisticsSolutionElementBuilder.newInstance(Id.create("directCarrierLSE", LogisticsSolutionElement.class))
+			LogisticChainElement directCarrierElement = LSPUtils.LogisticChainElementBuilder.newInstance(Id.create("directCarrierLSE", LogisticChainElement.class))
 					.setResource(directCarrierRessource)
 					.build();
 
 
-			LogisticsSolution solution_direct = LSPUtils.LogisticsSolutionBuilder.newInstance(Id.create("directSolution", LogisticsSolution.class))
-					.addSolutionElement(directCarrierElement)
+			LogisticChain solution_direct = LSPUtils.LogisticChainBuilder.newInstance(Id.create("directSolution", LogisticChain.class))
+					.addLogisticChainElement(directCarrierElement)
 					.build();
 
-			final ShipmentAssigner singleSolutionShipmentAssigner = UsecaseUtils.createSingleSolutionShipmentAssigner();
+			final ShipmentAssigner singleSolutionShipmentAssigner = UsecaseUtils.createSingleLogisticChainShipmentAssigner();
 			lspPlan_direct = LSPUtils.createLSPPlan()
-					.addSolution(solution_direct)
+					.addLogisticChain(solution_direct)
 					.setAssigner(singleSolutionShipmentAssigner);
 		}
 
@@ -215,16 +239,15 @@ final class ExampleTwoEchelonGrid {
 			Carrier mainCarrier = CarrierUtils.createCarrier(Id.create("mainCarrier", Carrier.class));
 			mainCarrier.getCarrierCapabilities().setFleetSize(CarrierCapabilities.FleetSize.INFINITE);
 
-			CarrierUtils.addCarrierVehicle(mainCarrier, CarrierVehicle.newInstance(Id.createVehicleId("mainTruck"), DEPOT_LINK_ID, VEH_TYPE_LARGE_10));
-			LSPResource mainCarrierRessource = UsecaseUtils.MainRunCarrierResourceBuilder.newInstance(Id.create("mainCarrierRes", LSPResource.class), network)
-					.setCarrier(mainCarrier)
+			CarrierUtils.addCarrierVehicle(mainCarrier, CarrierVehicle.newInstance(Id.createVehicleId("mainTruck"), DEPOT_LINK_ID, VEH_TYPE_LARGE_50));
+			LSPResource mainCarrierRessource = UsecaseUtils.MainRunCarrierResourceBuilder.newInstance(mainCarrier, network)
 					.setFromLinkId(DEPOT_LINK_ID)
 					.setMainRunCarrierScheduler(UsecaseUtils.createDefaultMainRunCarrierScheduler())
 					.setToLinkId(HUB_LINK_ID)
 					.setVehicleReturn(UsecaseUtils.VehicleReturn.returnToFromLink)
 					.build();
 
-			LogisticsSolutionElement mainCarrierLSE = LSPUtils.LogisticsSolutionElementBuilder.newInstance(Id.create("mainCarrierLSE", LogisticsSolutionElement.class))
+			LogisticChainElement mainCarrierLSE = LSPUtils.LogisticChainElementBuilder.newInstance(Id.create("mainCarrierLSE", LogisticChainElement.class))
 					.setResource(mainCarrierRessource)
 					.build();
 
@@ -240,20 +263,25 @@ final class ExampleTwoEchelonGrid {
 					.build();
 			LSPUtils.setFixedCost(hubResource, HUBCOSTS_FIX); //Set fixed costs (per day) for the availability of the hub.
 
-			LogisticsSolutionElement hubLSE = LSPUtils.LogisticsSolutionElementBuilder.newInstance(Id.create("HubLSE", LogisticsSolutionElement.class))
+			LogisticChainElement hubLSE = LSPUtils.LogisticChainElementBuilder.newInstance(Id.create("HubLSE", LogisticChainElement.class))
 					.setResource(hubResource)
 					.build(); //Nicht unbedingt nötig, aber nehme den alten Hub nun als Depot. Waren werden dann dort "Zusammengestellt".
 
 			Carrier distributionCarrier = CarrierUtils.createCarrier(Id.create("distributionCarrier", Carrier.class));
 			distributionCarrier.getCarrierCapabilities().setFleetSize(CarrierCapabilities.FleetSize.INFINITE);
 
-			CarrierUtils.addCarrierVehicle(distributionCarrier, CarrierVehicle.newInstance(Id.createVehicleId("distributionTruck"), HUB_LINK_ID, VEH_TYPE_SMALL_02));
-			LSPResource distributionCarrierRessource = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(Id.create("distributionCarrierRes", LSPResource.class), network)
-					.setCarrier(distributionCarrier)
+			final VehicleType vehType;
+			switch (costSetting) {
+				case sameCost ->  vehType = VEH_TYPE_LARGE_50;
+				case lowerCost4LastMile -> 	vehType = VEH_TYPE_SMALL_05;
+				default -> throw new IllegalStateException("Unexpected value: " + costSetting);
+			}
+			CarrierUtils.addCarrierVehicle(distributionCarrier, CarrierVehicle.newInstance(Id.createVehicleId("distributionTruck"), HUB_LINK_ID, vehType));
+			LSPResource distributionCarrierRessource = UsecaseUtils.DistributionCarrierResourceBuilder.newInstance(distributionCarrier, network)
 					.setDistributionScheduler(UsecaseUtils.createDefaultDistributionCarrierScheduler())
 					.build();
 
-			LogisticsSolutionElement distributionCarrierElement = LSPUtils.LogisticsSolutionElementBuilder.newInstance(Id.create("distributionCarrierLSE", LogisticsSolutionElement.class))
+			LogisticChainElement distributionCarrierElement = LSPUtils.LogisticChainElementBuilder.newInstance(Id.create("distributionCarrierLSE", LogisticChainElement.class))
 					.setResource(distributionCarrierRessource)
 					.build();
 
@@ -262,15 +290,15 @@ final class ExampleTwoEchelonGrid {
 			mainCarrierLSE.connectWithNextElement(hubLSE);
 			hubLSE.connectWithNextElement(distributionCarrierElement);
 
-			LogisticsSolution solution_withHub = LSPUtils.LogisticsSolutionBuilder.newInstance(Id.create("hubSolution", LogisticsSolution.class))
-					.addSolutionElement(mainCarrierLSE)
-					.addSolutionElement(hubLSE)
-					.addSolutionElement(distributionCarrierElement)
+			LogisticChain solution_withHub = LSPUtils.LogisticChainBuilder.newInstance(Id.create("hubSolution", LogisticChain.class))
+					.addLogisticChainElement(mainCarrierLSE)
+					.addLogisticChainElement(hubLSE)
+					.addLogisticChainElement(distributionCarrierElement)
 					.build();
 
 			lspPlan_withHub = LSPUtils.createLSPPlan()
-					.addSolution(solution_withHub)
-					.setAssigner(UsecaseUtils.createSingleSolutionShipmentAssigner());
+					.addLogisticChain(solution_withHub)
+					.setAssigner(UsecaseUtils.createSingleLogisticChainShipmentAssigner());
 		}
 
 		//Todo: Auch das ist wirr: Muss hier alle sommeln, damit man die dann im LSPBuilder dem SolutionScheduler mitgeben kann. Im Nachgang packt man dann aber erst den zweiten Plan dazu ... urgs KMT'Jul22
@@ -280,44 +308,79 @@ final class ExampleTwoEchelonGrid {
 
 		LSP lsp = LSPUtils.LSPBuilder.getInstance(Id.create("myLSP", LSP.class))
 				.setInitialPlan(lspPlan_direct)
-				.setSolutionScheduler(UsecaseUtils.createDefaultSimpleForwardSolutionScheduler(createResourcesListFromLSPPlans(lspPlans)))
+				.setLogisticChainScheduler(UsecaseUtils.createDefaultSimpleForwardLogisticChainScheduler(createResourcesListFromLSPPlans(lspPlans)))
 				.build();
 		lsp.addPlan(lspPlan_withHub); //add the second plan to the lsp
 
 		log.info("create initial LSPShipments");
 		log.info("assign the shipments to the LSP");
-		for (LSPShipment shipment : createInitialLSPShipments()) {
+		for (LSPShipment shipment : createInitialLSPShipments(network)) {
 			lsp.assignShipmentToLSP(shipment);
 		}
 
 		log.info("schedule the LSP with the shipments and according to the scheduler of the Resource");
-		lsp.scheduleSolutions();
+		lsp.scheduleLogisticChains();
 
 		return lsp;
 	}
 
-	private static Collection<LSPShipment> createInitialLSPShipments() {
+	private static Collection<LSPShipment> createInitialLSPShipments(Network network) {
 		List<LSPShipment> shipmentList = new ArrayList<>();
 
-		Random rand = MatsimRandom.getRandom();
-		int i = 1;
-//		for(int i = 1; i < 6; i++) {
-		Id<LSPShipment> id = Id.create("Shipment_" + i, LSPShipment.class);
-		ShipmentUtils.LSPShipmentBuilder builder = ShipmentUtils.LSPShipmentBuilder.newInstance(id);
-//		int capacityDemand = rand.nextInt(10);
-		int capacityDemand = rand.nextInt(5);
-		builder.setCapacityDemand(capacityDemand);
+		switch (demandSetting) {
+			case oneCustomer -> {
+				Id<LSPShipment> id = Id.create("Shipment_" + 1, LSPShipment.class);
+				int capacityDemand = 1;
 
-		builder.setFromLinkId(DEPOT_LINK_ID);
-		builder.setToLinkId(Id.createLinkId("i(5,5)R"));
+				ShipmentUtils.LSPShipmentBuilder builder = ShipmentUtils.LSPShipmentBuilder.newInstance(id);
 
-		builder.setEndTimeWindow(TimeWindow.newInstance(0, (24 * 3600)));
-		builder.setStartTimeWindow(TimeWindow.newInstance(0, (24 * 3600)));
-		builder.setDeliveryServiceTime(capacityDemand * 60);
+				builder.setCapacityDemand(capacityDemand);
+				builder.setFromLinkId(DEPOT_LINK_ID);
+				builder.setToLinkId(Id.createLinkId("i(5,5)R"));
+				builder.setEndTimeWindow(TimeWindow.newInstance(0, (24 * 3600)));
+				builder.setStartTimeWindow(TimeWindow.newInstance(0, (24 * 3600)));
+				builder.setDeliveryServiceTime(capacityDemand * 60);
 
-		shipmentList.add(builder.build());
-//		}
-		return shipmentList;
+				shipmentList.add(builder.build());
+
+				return shipmentList;
+			}
+			case tenCustomers -> {
+				Random rand1 = MatsimRandom.getLocalInstance();
+				Random rand2 = MatsimRandom.getLocalInstance();
+
+
+				List<String> zoneLinkList = Arrays.asList("i(4,4)", "i(5,4)", "i(6,4)", "i(4,6)", "i(5,6)", "i(6,6)",
+						"j(3,5)", "j(3,6)", "j(3,7)", "j(5,5)", "j(5,6)", "j(5,7)",
+						"i(4,5)R", "i(5,5)R", "i(6,5)R", "i(4,7)R", "i(5,7)R", "i(6,7)R",
+						"j(4,5)R", "j(4,6)R", "j(4,7)R", "j(6,5)R", "j(6,6)R", "j(6,7)R");
+				for (String linkIdString : zoneLinkList) {
+					if (!network.getLinks().containsKey( Id.createLinkId(linkIdString))) {
+						throw new RuntimeException("Link is not in Network!");
+					}
+				}
+
+				for(int i = 1; i <= 10; i++) {
+					Id<LSPShipment> id = Id.create("Shipment_" + i, LSPShipment.class);
+					ShipmentUtils.LSPShipmentBuilder builder = ShipmentUtils.LSPShipmentBuilder.newInstance(id);
+
+					int capacityDemand = rand1.nextInt(5) +1; //Random is drawn from 0 (incl) to b0und (excl) -> adding 1.
+					builder.setCapacityDemand(capacityDemand);
+
+					builder.setFromLinkId(DEPOT_LINK_ID);
+					final Id<Link> toLinkId = Id.createLinkId(zoneLinkList.get(rand2.nextInt(zoneLinkList.size()-1)));
+					builder.setToLinkId(toLinkId);
+
+					builder.setEndTimeWindow(TimeWindow.newInstance(0, (24 * 3600)));
+					builder.setStartTimeWindow(TimeWindow.newInstance(0, (24 * 3600)));
+					builder.setDeliveryServiceTime(capacityDemand * 60);
+
+					shipmentList.add(builder.build());
+				}
+				return shipmentList;
+			}
+			default -> throw new IllegalStateException("Unexpected value: " + demandSetting);
+		}
 	}
 
 	//TODO: This is maybe something that can go into a utils class ... KMT jul22
@@ -325,26 +388,13 @@ final class ExampleTwoEchelonGrid {
 		log.info("Collecting all LSPResources from the LSPPlans");
 		List<LSPResource> resourcesList = new ArrayList<>();            //TODO: Mache daraus ein Set, damit jede Resource nur einmal drin ist? kmt Feb22
 		for (LSPPlan lspPlan : lspPlans) {
-			for (LogisticsSolution solution : lspPlan.getSolutions()) {
-				for (LogisticsSolutionElement solutionElement : solution.getSolutionElements()) {
+			for (LogisticChain solution : lspPlan.getLogisticChains()) {
+				for (LogisticChainElement solutionElement : solution.getLogisticChainElements()) {
 					resourcesList.add(solutionElement.getResource());
 				}
 			}
 		}
 		return resourcesList;
-	}
-
-
-	private static void printScores(Collection<LSP> lsps) {
-		for (LSP lsp : lsps) {
-			log.info("The LSP `` " + lsp.getId() + " ´´ has the following number of plans: " + lsp.getPlans().size());
-			log.info("The scores are");
-			for (LSPPlan plan : lsp.getPlans()) {
-				log.info(plan.getScore());
-			}
-			log.info("The selected plan has the score: " + lsp.getSelectedPlan().getScore());
-			log.info("###");
-		}
 	}
 
 

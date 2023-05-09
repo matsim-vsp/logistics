@@ -38,6 +38,7 @@ import org.matsim.contrib.freight.carrier.*;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.events.handler.BasicEventHandler;
@@ -49,15 +50,17 @@ import org.matsim.vehicles.VehicleType;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import static lsp.usecase.UsecaseUtils.*;
 import static org.junit.Assert.*;
 
 public class CollectionLSPMobsimTest {
-	private static final Logger log = LogManager.getLogger(CollectionLSPMobsimTest.class);
 
 	@Rule
 	public final MatsimTestUtils utils = new MatsimTestUtils();
+	private static final Logger log = LogManager.getLogger(CollectionLSPMobsimTest.class);
 
 	private LSP collectionLSP;
 	private Carrier carrier;
@@ -106,33 +109,31 @@ public class CollectionLSPMobsimTest {
 		carrier.setCarrierCapabilities(capabilities);
 
 
-		Id<LSPResource> adapterId = Id.create("CollectionCarrierResource", LSPResource.class);
-		CollectionCarrierResourceBuilder adapterBuilder = CollectionCarrierResourceBuilder.newInstance(adapterId, scenario.getNetwork());
-		adapterBuilder.setCollectionScheduler(createDefaultCollectionCarrierScheduler());
-		adapterBuilder.setCarrier(carrier);
-		adapterBuilder.setLocationLinkId(collectionLinkId);
-		collectionResource = adapterBuilder.build();
 
-		final LogisticsSolutionElement collectionElement;
+		collectionResource  = CollectionCarrierResourceBuilder.newInstance(carrier, scenario.getNetwork())
+				.setCollectionScheduler(createDefaultCollectionCarrierScheduler()).setLocationLinkId(collectionLinkId)
+				.build();
+
+		final LogisticChainElement collectionElement;
 		{
-			Id<LogisticsSolutionElement> elementId = Id.create("CollectionElement", LogisticsSolutionElement.class);
-			LSPUtils.LogisticsSolutionElementBuilder collectionElementBuilder = LSPUtils.LogisticsSolutionElementBuilder.newInstance(elementId);
+			Id<LogisticChainElement> elementId = Id.create("CollectionElement", LogisticChainElement.class);
+			LSPUtils.LogisticChainElementBuilder collectionElementBuilder = LSPUtils.LogisticChainElementBuilder.newInstance(elementId);
 			collectionElementBuilder.setResource(collectionResource);
 			collectionElement = collectionElementBuilder.build();
 		}
-		final LogisticsSolution collectionSolution;
+		final LogisticChain collectionSolution;
 		{
-			Id<LogisticsSolution> collectionSolutionId = Id.create("CollectionSolution", LogisticsSolution.class);
-			LSPUtils.LogisticsSolutionBuilder collectionSolutionBuilder = LSPUtils.LogisticsSolutionBuilder.newInstance(collectionSolutionId);
-			collectionSolutionBuilder.addSolutionElement(collectionElement);
+			Id<LogisticChain> collectionSolutionId = Id.create("CollectionSolution", LogisticChain.class);
+			LSPUtils.LogisticChainBuilder collectionSolutionBuilder = LSPUtils.LogisticChainBuilder.newInstance(collectionSolutionId);
+			collectionSolutionBuilder.addLogisticChainElement(collectionElement);
 			collectionSolution = collectionSolutionBuilder.build();
 		}
 		final LSPPlan collectionPlan;
 		{
-			ShipmentAssigner assigner = createSingleSolutionShipmentAssigner();
+			ShipmentAssigner assigner = createSingleLogisticChainShipmentAssigner();
 			collectionPlan = LSPUtils.createLSPPlan();
 			collectionPlan.setAssigner(assigner);
-			collectionPlan.addSolution(collectionSolution);
+			collectionPlan.addLogisticChain(collectionSolution);
 		}
 		{
 			final LSPUtils.LSPBuilder collectionLSPBuilder;
@@ -140,13 +141,13 @@ public class CollectionLSPMobsimTest {
 			collectionLSPBuilder = LSPUtils.LSPBuilder.getInstance(Id.create("CollectionLSP", LSP.class));
 			collectionLSPBuilder.setInitialPlan(collectionPlan);
 			resourcesList.add(collectionResource);
-			SolutionScheduler simpleScheduler = createDefaultSimpleForwardSolutionScheduler(resourcesList);
+			LogisticChainScheduler simpleScheduler = createDefaultSimpleForwardLogisticChainScheduler(resourcesList);
 			simpleScheduler.setBufferTime(300);
-			collectionLSPBuilder.setSolutionScheduler(simpleScheduler);
+			collectionLSPBuilder.setLogisticChainScheduler(simpleScheduler);
 			collectionLSP = collectionLSPBuilder.build();
 		}
 		{
-			ArrayList<Link> linkList = new ArrayList<>(scenario.getNetwork().getLinks().values());
+			List<Link> linkList = new LinkedList<>(scenario.getNetwork().getLinks().values());
 			for (int i = 1; i < 2; i++) {
 				Id<LSPShipment> id = Id.create(i, LSPShipment.class);
 				ShipmentUtils.LSPShipmentBuilder builder = ShipmentUtils.LSPShipmentBuilder.newInstance(id);
@@ -154,7 +155,7 @@ public class CollectionLSPMobsimTest {
 				builder.setCapacityDemand(capacityDemand);
 
 				while (true) {
-					Collections.shuffle(linkList);
+					Collections.shuffle(linkList, MatsimRandom.getRandom());
 					Link pendingFromLink = linkList.get(0);
 					if (pendingFromLink.getFromNode().getCoord().getX() <= 4000 &&
 							pendingFromLink.getFromNode().getCoord().getY() <= 4000 &&
@@ -174,7 +175,7 @@ public class CollectionLSPMobsimTest {
 				LSPShipment shipment = builder.build();
 				collectionLSP.assignShipmentToLSP(shipment);
 			}
-			collectionLSP.scheduleSolutions();
+			collectionLSP.scheduleLogisticChains();
 		}
 		final LSPs lsps;
 		{
@@ -198,6 +199,8 @@ public class CollectionLSPMobsimTest {
 		});
 
 		LSPUtils.addLSPs(scenario, lsps);
+		//The VSP default settings are designed for person transport simulation. After talking to Kai, they will be set to WARN here. Kai MT may'23
+		controler.getConfig().vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn);
 		controler.run();
 	}
 
@@ -234,9 +237,15 @@ public class CollectionLSPMobsimTest {
 				ShipmentPlanElement logElement = logElements.get(scheduleElements.indexOf(scheduleElement));
 				assertEquals(scheduleElement.getElementType(), logElement.getElementType());
 				assertSame(scheduleElement.getResourceId(), logElement.getResourceId());
-				assertSame(scheduleElement.getSolutionElement(), logElement.getSolutionElement());
+				assertSame(scheduleElement.getLogisticChainElement(), logElement.getLogisticChainElement());
 				assertEquals(scheduleElement.getStartTime(), logElement.getStartTime(), 300);
 			}
 		}
 	}
+
+	@Test
+	public void compareEvents(){
+		MatsimTestUtils.assertEqualEventsFiles(utils.getClassInputDirectory() + "output_events.xml.gz", utils.getOutputDirectory() + "output_events.xml.gz" );
+	}
+
 }

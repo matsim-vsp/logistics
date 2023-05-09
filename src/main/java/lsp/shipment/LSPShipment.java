@@ -21,7 +21,6 @@
 package lsp.shipment;
 
 import lsp.HasSimulationTrackers;
-import lsp.LogisticsSolution;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.network.Link;
@@ -58,7 +57,5 @@ public interface LSPShipment extends Identifiable<LSPShipment>, Attributable, Ha
 	ShipmentPlan getLog();
 
 	Collection<Requirement> getRequirements();
-
-	Id<LogisticsSolution> getSolutionId();
 
 }

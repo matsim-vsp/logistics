@@ -28,9 +28,10 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.Carriers;
 import org.matsim.contrib.freight.controler.CarrierAgentTracker;
-import org.matsim.contrib.freight.utils.FreightUtils;
+import org.matsim.contrib.freight.controler.FreightUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.controler.MatsimServices;
+import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.*;
 import org.matsim.core.controler.listener.*;
 import org.matsim.core.events.handler.EventHandler;
@@ -42,7 +43,7 @@ import java.util.List;
 
 
 class LSPControlerListener implements BeforeMobsimListener, AfterMobsimListener, ScoringListener,
-							  ReplanningListener, IterationStartsListener{
+							  ReplanningListener, IterationStartsListener, IterationEndsListener{
 	private static final Logger log = LogManager.getLogger( LSPControlerListener.class );
 	private final Scenario scenario;
 
@@ -53,6 +54,7 @@ class LSPControlerListener implements BeforeMobsimListener, AfterMobsimListener,
 	@Inject private MatsimServices matsimServices;
 	@Inject private LSPScorerFactory lspScoringFunctionFactory;
 	@Inject @Nullable private LSPStrategyManager strategyManager;
+	@Inject private OutputDirectoryHierarchy controlerIO;
 
 	@Inject private CarrierAgentTracker carrierAgentTracker;
 
@@ -68,7 +70,7 @@ class LSPControlerListener implements BeforeMobsimListener, AfterMobsimListener,
 		// Doing so results in a lot of "not adding eventsHandler since already added" warnings.
 		// @KN: Would it be possible to do it in (simulation) startup and therefor only oce?
 		for (LSP lsp : lsps.getLSPs().values()) {
-			((LSPImpl) lsp).setScorer( lspScoringFunctionFactory.createScoringFunction( lsp ) );
+			((LSPImpl) lsp).setScorer( lspScoringFunctionFactory.createScoringFunction() );
 
 			// simulation trackers of lsp:
 			registerSimulationTrackers(lsp );
@@ -79,11 +81,11 @@ class LSPControlerListener implements BeforeMobsimListener, AfterMobsimListener,
 			}
 
 			// simulation trackers of solutions:
-			for (LogisticsSolution solution : lsp.getSelectedPlan().getSolutions()) {
+			for (LogisticChain solution : lsp.getSelectedPlan().getLogisticChains()) {
 				registerSimulationTrackers(solution );
 
 				// simulation trackers of solution elements:
-				for (LogisticsSolutionElement element : solution.getSolutionElements()) {
+				for (LogisticChainElement element : solution.getLogisticChainElements()) {
 					registerSimulationTrackers(element );
 
 					// simulation trackers of resources:
@@ -138,7 +140,7 @@ class LSPControlerListener implements BeforeMobsimListener, AfterMobsimListener,
 	@Override
 	public void notifyScoring(ScoringEvent scoringEvent) {
 		for (LSP lsp : LSPUtils.getLSPs(scenario).getLSPs().values()) {
-			lsp.scoreSelectedPlan(scoringEvent);
+			lsp.scoreSelectedPlan();
 		}
 		// yyyyyy might make more sense to register the lsps directly as scoring controler listener (??)
 	}
@@ -155,8 +157,8 @@ class LSPControlerListener implements BeforeMobsimListener, AfterMobsimListener,
 		Carriers carriers = new Carriers();
 		for (LSP lsp : lsps.getLSPs().values()) {
 			LSPPlan selectedPlan = lsp.getSelectedPlan();
-			for (LogisticsSolution solution : selectedPlan.getSolutions()) {
-				for (LogisticsSolutionElement element : solution.getSolutionElements()) {
+			for (LogisticChain solution : selectedPlan.getLogisticChains()) {
+				for (LogisticChainElement element : solution.getLogisticChainElements()) {
 					if( element.getResource() instanceof LSPCarrierResource carrierResource ) {
 						Carrier carrier = carrierResource.getCarrier();
 						if (!carriers.getCarriers().containsKey(carrier.getId())) {
@@ -171,5 +173,10 @@ class LSPControlerListener implements BeforeMobsimListener, AfterMobsimListener,
 
 	@Override
 	public void notifyIterationStarts(IterationStartsEvent event) {
+	}
+
+	@Override
+	public void notifyIterationEnds(IterationEndsEvent event) {
+		new LSPPlanXmlWriter(LSPUtils.getLSPs(scenario)).write(controlerIO.getIterationFilename(event.getIteration(), "lsps.xml"));
 	}
 }

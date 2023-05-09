@@ -23,7 +23,6 @@ package lsp;
 import lsp.shipment.LSPShipment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.core.controler.events.ScoringEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +33,7 @@ import java.util.List;
 
 	private final Collection<LSPShipment> shipments;
 	private final ArrayList<LSPPlan> plans;
-	private final SolutionScheduler solutionScheduler;
+	private final LogisticChainScheduler logisticChainScheduler;
 	private final Collection<LSPResource> resources;
 	private LSPPlan selectedPlan;
 	private LSPScorer scorer;
@@ -45,8 +44,8 @@ import java.util.List;
 		super(builder.id);
 		this.shipments = new ArrayList<>();
 		this.plans = new ArrayList<>();
-		this.solutionScheduler = builder.solutionScheduler;
-		this.solutionScheduler.setEmbeddingContainer(this);
+		this.logisticChainScheduler = builder.logisticChainScheduler;
+		this.logisticChainScheduler.setEmbeddingContainer(this);
 		this.selectedPlan = builder.initialPlan;
 		this.selectedPlan.setLSP(this);
 		this.plans.add(builder.initialPlan);
@@ -63,29 +62,29 @@ import java.util.List;
 	}
 
 	public static LSPPlan copyPlan(LSPPlan plan2copy) {
-		List<LogisticsSolution> copiedSolutions = new ArrayList<>();
-		for (LogisticsSolution solution : plan2copy.getSolutions()) {
-			LogisticsSolution copiedSolution = LSPUtils.LogisticsSolutionBuilder.newInstance(solution.getId()).build();
-			copiedSolution.getSolutionElements().addAll(solution.getSolutionElements());
+		List<LogisticChain> copiedSolutions = new ArrayList<>();
+		for (LogisticChain solution : plan2copy.getLogisticChains()) {
+			LogisticChain copiedSolution = LSPUtils.LogisticChainBuilder.newInstance(solution.getId()).build();
+			copiedSolution.getLogisticChainElements().addAll(solution.getLogisticChainElements());
 			copiedSolutions.add(copiedSolution);
 		}
 		LSPPlan copiedPlan = LSPUtils.createLSPPlan();
 		copiedPlan.setAssigner(plan2copy.getAssigner());
 		copiedPlan.setLSP(plan2copy.getLSP());
 		copiedPlan.setScore( plan2copy.getScore() );
-		copiedPlan.getSolutions().addAll(copiedSolutions);
+		copiedPlan.getLogisticChains().addAll(copiedSolutions);
 		return copiedPlan;
 	}
 
 	@Override
-	public void scheduleSolutions() {
-		solutionScheduler.scheduleSolutions();
+	public void scheduleLogisticChains() {
+		logisticChainScheduler.scheduleLogisticChain();
 	}
 
 	@Override
 	public boolean addPlan(LSPPlan plan) {
-		for (LogisticsSolution solution : plan.getSolutions()) {
-			for (LogisticsSolutionElement element : solution.getSolutionElements()) {
+		for (LogisticChain solution : plan.getLogisticChains()) {
+			for (LogisticChainElement element : solution.getLogisticChainElements()) {
 				if (!resources.contains(element.getResource())) {
 					resources.add(element.getResource());
 				}
@@ -136,7 +135,7 @@ import java.util.List;
 		return resources;
 	}
 
-	public void scoreSelectedPlan(ScoringEvent scoringEvent) {
+	public void scoreSelectedPlan() {
 		if (this.scorer != null) {
 			this.selectedPlan.setScore(scorer.getScoreForCurrentPlan() );
 		} else {
@@ -148,7 +147,7 @@ import java.util.List;
 	@Override
 	public void assignShipmentToLSP(LSPShipment shipment) {
 		shipments.add(shipment);
-		selectedPlan.getAssigner().assignToSolution(shipment);
+		selectedPlan.getAssigner().assignToLogisticChain(shipment);
 	}
 
 	@Override

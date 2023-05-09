@@ -22,7 +22,6 @@ package lsp;
 
 import lsp.shipment.LSPShipment;
 import org.matsim.api.core.v01.population.HasPlansAndId;
-import org.matsim.core.controler.events.ScoringEvent;
 
 import java.util.Collection;
 
@@ -43,7 +42,7 @@ public interface LSP extends HasPlansAndId<LSPPlan, LSP>, HasSimulationTrackers<
 	/**
 	 * ok (behavioral method)
 	 */
-	void scheduleSolutions();
+	void scheduleLogisticChains();
 
 
 	/**
@@ -55,9 +54,8 @@ public interface LSP extends HasPlansAndId<LSPPlan, LSP>, HasSimulationTrackers<
 	/**
 	 * ok (behavioral method)
 	 *
-	 * @param scoringEvent
 	 */
-	void scoreSelectedPlan(ScoringEvent scoringEvent);
+	void scoreSelectedPlan();
 
 
 	/**

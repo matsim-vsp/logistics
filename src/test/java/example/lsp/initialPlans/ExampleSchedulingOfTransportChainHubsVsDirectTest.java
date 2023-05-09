@@ -49,8 +49,8 @@ public class ExampleSchedulingOfTransportChainHubsVsDirectTest {
 			fail();
 		}
 
-		//Compare written out schedule.
-		MatsimTestUtils.compareFilesLineByLine(utils.getInputDirectory() + "schedules.tsv", utils.getOutputDirectory() + "LSPwithReloading_schedules.tsv");
+		//Compare events files
+		MatsimTestUtils.assertEqualEventsFiles(utils.getInputDirectory() + "output_events.xml.gz", utils.getOutputDirectory() + "output_events.xml.gz" );
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class ExampleSchedulingOfTransportChainHubsVsDirectTest {
 			fail();
 		}
 
-		//Compare written out schedule.
-		MatsimTestUtils.compareFilesLineByLine(utils.getInputDirectory() + "schedules.tsv", utils.getOutputDirectory() + "LSPdirect_schedules.tsv");
+		//Compare events files
+		MatsimTestUtils.assertEqualEventsFiles(utils.getInputDirectory() + "output_events.xml.gz", utils.getOutputDirectory() + "output_events.xml.gz" );
 	}
 }

@@ -21,7 +21,6 @@
 package lsp.shipment;
 
 import lsp.LSPDataObject;
-import lsp.LogisticsSolution;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.freight.carrier.TimeWindow;
@@ -42,7 +41,6 @@ class LSPShipmentImpl extends LSPDataObject<LSPShipment> implements LSPShipment 
 	private final ShipmentPlan schedule;
 	private final ShipmentPlan log;
 	private final List<Requirement> requirements;
-	private Id<LogisticsSolution> solutionId;
 
 	LSPShipmentImpl(ShipmentUtils.LSPShipmentBuilder builder) {
 		super(builder.id);
@@ -105,13 +103,24 @@ class LSPShipmentImpl extends LSPDataObject<LSPShipment> implements LSPShipment 
 	}
 
 	@Override
-	public Id<LogisticsSolution> getSolutionId() {
-		return solutionId;
-	}
-
-	@Override
 	public double getPickupServiceTime() {
 		return pickupServiceTime;
 	}
 
+	@Override public String toString() {
+		return "LSPShipmentImpl{" +
+				"Id=" + getId() +
+				"\t fromLinkId=" + fromLinkId +
+				"\t toLinkId=" + toLinkId +
+				"\t capacityDemand=" + capacityDemand +
+				"\t startTimeWindow=" + startTimeWindow +
+				"\t endTimeWindow=" + endTimeWindow +
+				"\t capacityDemand=" + capacityDemand +
+				"\t deliveryServiceTime=" + deliveryServiceTime +
+				"\t pickupServiceTime=" + pickupServiceTime +
+//				"\t schedule=" + schedule +
+//				"\t log=" + log +
+//				"\t requirements=" + requirements +
+				'}';
+	}
 }

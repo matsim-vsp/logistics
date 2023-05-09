@@ -21,12 +21,12 @@
 package lsp.shipment;
 
 import lsp.LSPResource;
-import lsp.LogisticsSolutionElement;
+import lsp.LogisticChainElement;
 import org.matsim.api.core.v01.Id;
 
 public interface ShipmentPlanElement {
 
-	LogisticsSolutionElement getSolutionElement();
+	LogisticChainElement getLogisticChainElement();
 
 	Id<LSPResource> getResourceId();
 
