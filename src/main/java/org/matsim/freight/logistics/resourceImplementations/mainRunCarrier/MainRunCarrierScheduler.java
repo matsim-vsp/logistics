@@ -22,6 +22,7 @@ package org.matsim.freight.logistics.resourceImplementations.mainRunCarrier;
 
 import org.matsim.freight.logistics.*;
 import org.matsim.freight.logistics.resourceImplementations.CarrierSchedulerUtils;
+import org.matsim.freight.logistics.resourceImplementations.LSPTourEndEventHandler;
 import org.matsim.freight.logistics.resourceImplementations.ResourceImplementationUtils;
 import org.matsim.freight.logistics.shipment.ShipmentPlanElement;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
@@ -325,7 +326,7 @@ import java.util.*;
 	private void addMainRunTourEndEventHandler(CarrierService carrierService, LspShipmentWithTime tuple, LSPCarrierResource resource, Tour tour) {
 		for (LogisticChainElement element : this.resource.getClientElements()) {
 			if (element.getIncomingShipments().getShipments().contains(tuple)) {
-				MainRunTourEndEventHandler handler = new MainRunTourEndEventHandler(tuple.getShipment(), carrierService, element, resource, tour);
+				LSPTourEndEventHandler handler = new LSPTourEndEventHandler(tuple.getShipment(), carrierService, element, resource );
 				tuple.getShipment().addSimulationTracker(handler);
 				break;
 			}

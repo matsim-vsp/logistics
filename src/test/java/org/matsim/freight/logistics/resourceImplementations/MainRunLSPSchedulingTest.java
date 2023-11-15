@@ -23,12 +23,9 @@ package org.matsim.freight.logistics.resourceImplementations;
 import org.matsim.freight.logistics.*;
 import org.matsim.freight.logistics.resourceImplementations.collectionCarrier.CollectionCarrierUtils;
 import org.matsim.freight.logistics.resourceImplementations.collectionCarrier.CollectionServiceEndEventHandler;
-import org.matsim.freight.logistics.resourceImplementations.collectionCarrier.CollectionTourEndEventHandler;
 import org.matsim.freight.logistics.resourceImplementations.mainRunCarrier.MainRunCarrierUtils;
-import org.matsim.freight.logistics.resourceImplementations.mainRunCarrier.MainRunTourEndEventHandler;
 import org.matsim.freight.logistics.resourceImplementations.mainRunCarrier.MainRunTourStartEventHandler;
 import org.matsim.freight.logistics.resourceImplementations.transshipmentHub.TranshipmentHubUtils;
-import org.matsim.freight.logistics.resourceImplementations.transshipmentHub.TransshipmentHubTourEndEventHandler;
 import org.matsim.freight.logistics.shipment.LSPShipment;
 import org.matsim.freight.logistics.shipment.ShipmentPlanElement;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
@@ -326,10 +323,10 @@ public class MainRunLSPSchedulingTest {
 
 		assertEquals(1, firstTranshipmentHubResource.getSimulationTrackers().size());
 		ArrayList<EventHandler> eventHandlers = new ArrayList<>(firstTranshipmentHubResource.getSimulationTrackers());
-		assertTrue(eventHandlers.iterator().next() instanceof TransshipmentHubTourEndEventHandler);
-		TransshipmentHubTourEndEventHandler reloadEventHandler = (TransshipmentHubTourEndEventHandler) eventHandlers.iterator().next();
+		assertTrue(eventHandlers.iterator().next() instanceof LSPTourEndEventHandler );
+		LSPTourEndEventHandler reloadEventHandler = (LSPTourEndEventHandler) eventHandlers.iterator().next();
 
-		for (Entry<CarrierService, TransshipmentHubTourEndEventHandler.TransshipmentHubEventHandlerPair> entry : reloadEventHandler.getServicesWaitedFor().entrySet()) {
+		for (Entry<CarrierService, LSPTourEndEventHandler.TransshipmentHubEventHandlerPair> entry : reloadEventHandler.getServicesWaitedFor().entrySet()) {
 			CarrierService service = entry.getKey();
 			LSPShipment shipment = entry.getValue().shipment;
 			LogisticChainElement element = entry.getValue().element;
@@ -357,8 +354,8 @@ public class MainRunLSPSchedulingTest {
 			ArrayList<LogisticChainElement> solutionElements = new ArrayList<>(lsp.getSelectedPlan().getLogisticChains().iterator().next().getLogisticChainElements());
 			ArrayList<LSPResource> resources = new ArrayList<>(lsp.getResources());
 
-			assertTrue(eventHandlers.get(0) instanceof CollectionTourEndEventHandler);
-			CollectionTourEndEventHandler endHandler = (CollectionTourEndEventHandler) eventHandlers.get(0);
+			assertTrue(eventHandlers.get(0) instanceof LSPTourEndEventHandler );
+			LSPTourEndEventHandler endHandler = (LSPTourEndEventHandler) eventHandlers.get(0 );
 			assertSame(endHandler.getCarrierService().getLocationLinkId(), shipment.getFrom());
 			assertEquals(endHandler.getCarrierService().getCapacityDemand(), shipment.getSize());
 			assertEquals(endHandler.getCarrierService().getServiceDuration(), shipment.getDeliveryServiceTime(), 0.0);
@@ -406,8 +403,8 @@ public class MainRunLSPSchedulingTest {
 			assertSame(startHandler.getResource().getId(), planElements.get(6).getResourceId());
 			assertSame(startHandler.getResource().getId(), resources.get(2).getId());
 
-			assertTrue(eventHandlers.get(3) instanceof MainRunTourEndEventHandler);
-			MainRunTourEndEventHandler mainRunEndHandler = (MainRunTourEndEventHandler) eventHandlers.get(3);
+			assertTrue(eventHandlers.get(3) instanceof LSPTourEndEventHandler );
+			LSPTourEndEventHandler mainRunEndHandler = (LSPTourEndEventHandler) eventHandlers.get(3 );
 			assertSame(mainRunEndHandler.getCarrierService().getLocationLinkId(), toLinkId);
 			assertEquals(mainRunEndHandler.getCarrierService().getServiceDuration(), shipment.getDeliveryServiceTime(), 0.0);
 			assertEquals(mainRunEndHandler.getCarrierService().getCapacityDemand(), shipment.getSize());

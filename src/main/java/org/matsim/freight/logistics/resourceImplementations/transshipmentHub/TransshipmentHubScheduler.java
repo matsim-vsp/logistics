@@ -24,6 +24,7 @@ import org.matsim.freight.logistics.LSPResource;
 import org.matsim.freight.logistics.LSPResourceScheduler;
 import org.matsim.freight.logistics.LogisticChainElement;
 import org.matsim.freight.logistics.LspShipmentWithTime;
+import org.matsim.freight.logistics.resourceImplementations.LSPTourEndEventHandler;
 import org.matsim.freight.logistics.shipment.ShipmentPlan;
 import org.matsim.freight.logistics.shipment.ShipmentPlanElement;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
@@ -39,7 +40,7 @@ import java.util.ArrayList;
 	private final double capacityNeedLinear;
 	private final double capacityNeedFixed;
 	private TransshipmentHubResource transshipmentHubResource;
-	private TransshipmentHubTourEndEventHandler eventHandler;
+	private LSPTourEndEventHandler eventHandler;
 
 	TransshipmentHubScheduler(TranshipmentHubUtils.TranshipmentHubSchedulerBuilder builder) {
 		this.lspShipmentsWithTime = new ArrayList<>();
@@ -109,7 +110,7 @@ import java.util.ArrayList;
 		this.transshipmentHubResource = transshipmentHubResource;
 	}
 
-	public void setTransshipmentHubTourEndEventHandler( TransshipmentHubTourEndEventHandler eventHandler ) {
+	public void setTransshipmentHubTourEndEventHandler( LSPTourEndEventHandler eventHandler ) {
 		this.eventHandler = eventHandler;
 	}
 

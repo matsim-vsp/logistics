@@ -27,6 +27,7 @@ import org.matsim.freight.logistics.LogisticChainElement;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.freight.logistics.resourceImplementations.LSPTourEndEventHandler;
 
 import java.util.Collection;
 import java.util.List;
@@ -66,7 +67,7 @@ public class TransshipmentHubResource extends LSPDataObject<LSPResource> impleme
 		this.locationLinkId = builder.getLocationLinkId();
 		this.transshipmentHubScheduler = builder.getTransshipmentHubScheduler();
 		transshipmentHubScheduler.setTranshipmentHub(this);
-		TransshipmentHubTourEndEventHandler eventHandler = new TransshipmentHubTourEndEventHandler(this, scenario);
+		LSPTourEndEventHandler eventHandler = new LSPTourEndEventHandler(this, scenario);
 		transshipmentHubScheduler.setTransshipmentHubTourEndEventHandler(eventHandler );
 		this.clientElements = builder.getClientElements();
 //		this.addSimulationTracker(eventHandler); // Is already registered in the eventHandler itself --> Is even that necessary there?  KMT Nov 23
