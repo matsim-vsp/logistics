@@ -43,7 +43,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LSPTourEndEventHandler implements AfterMobsimListener, LSPSimulationTracker<LSPResource>, CarrierTourEndEventHandler {
+public class LSPTourEndEventHandler implements AfterMobsimListener, LSPSimulationTracker<LSPShipment>, CarrierTourEndEventHandler {
 // Todo: I have made it (temporarily) public because of junit tests :( -- need to find another way to do the junit testing. kmt jun'23
 
 	private Scenario scenario;
@@ -52,7 +52,6 @@ public class LSPTourEndEventHandler implements AfterMobsimListener, LSPSimulatio
 	private Id<LSPResource> resourceId;
 //	private Id<Link> linkId;
 	private EventsManager eventsManager;
-
 	private CarrierService carrierService;
 	private LogisticChainElement logisticChainElement;
 	private LSPCarrierResource resource;
@@ -72,25 +71,18 @@ public class LSPTourEndEventHandler implements AfterMobsimListener, LSPSimulatio
 		this.resourceId = transshipmentHubResource.getId();
 		this.scenario = scenario;
 		this.servicesWaitedFor = new HashMap<>();
-		this.transshipmentHubResource.addSimulationTracker(this);
+//		this.transshipmentHubResource.addSimulationTracker(this);
 	}
 
-	public LSPTourEndEventHandler( LSPShipment lspShipment, CarrierService carrierService, LogisticChainElement logisticChainElement, LSPCarrierResource resource ) {
+
+	public LSPTourEndEventHandler(LSPShipment lspShipment, CarrierService carrierService, LogisticChainElement logisticChainElement, LSPCarrierResource resource ) {
 		this.lspShipment = lspShipment;
 		this.carrierService = carrierService;
 		this.logisticChainElement = logisticChainElement;
 		this.resource = resource;
 	}
 
-	public LSPTourEndEventHandler( CarrierService carrierService, LSPShipment lspShipment, LogisticChainElement element, LSPCarrierResource resource ) {
-		this.carrierService = carrierService;
-		this.lspShipment = lspShipment;
-		this.logisticChainElement = element;
-		this.resource = resource;
-	}
 
-
-	@Override
 	public void setEmbeddingContainer(LSPResource pointer) {
 	}
 
@@ -261,6 +253,9 @@ public class LSPTourEndEventHandler implements AfterMobsimListener, LSPSimulatio
 
 	public Id<LSPResource> getResourceId() {
 		return resourceId;
+	}
+
+	public void setEmbeddingContainer(LSPShipment pointer) {
 	}
 
 //	public Id<Link> getLinkId() {

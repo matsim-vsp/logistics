@@ -326,7 +326,7 @@ import java.util.*;
 	private void addMainRunTourEndEventHandler(CarrierService carrierService, LspShipmentWithTime tuple, LSPCarrierResource resource, Tour tour) {
 		for (LogisticChainElement element : this.resource.getClientElements()) {
 			if (element.getIncomingShipments().getShipments().contains(tuple)) {
-				LSPTourEndEventHandler handler = new LSPTourEndEventHandler(tuple.getShipment(), carrierService, element, resource );
+				LSPTourEndEventHandler handler = new LSPTourEndEventHandler(tuple.getShipment(), carrierService, element, resource);
 				tuple.getShipment().addSimulationTracker(handler);
 				break;
 			}
