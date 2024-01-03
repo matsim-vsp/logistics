@@ -35,7 +35,7 @@ import org.matsim.vehicles.VehicleType;
 
 import java.util.*;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WorstPlanSelectorTest {
 

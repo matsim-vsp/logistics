@@ -1,7 +1,7 @@
 package org.matsim.freight.logistics.events;
 
-import org.junit.Assert;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.Event;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -49,7 +49,7 @@ public class LspEventsReaderTest {
 						ControllerConfigGroup.EventsFileFormat.xml);
 		eventsManager.finishProcessing();
 
-		Assert.assertArrayEquals(lspEvents.toArray(), handler.handledEvents.toArray());
+		Assertions.assertArrayEquals(lspEvents.toArray(), handler.handledEvents.toArray());
 	}
 
 	private static class TestEventHandler

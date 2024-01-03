@@ -39,7 +39,7 @@ import org.matsim.freight.carriers.CarrierCapabilities.FleetSize;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DistributionElementTest {
 

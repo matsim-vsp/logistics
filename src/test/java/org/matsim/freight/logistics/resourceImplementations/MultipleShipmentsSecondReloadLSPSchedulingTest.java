@@ -53,7 +53,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MultipleShipmentsSecondReloadLSPSchedulingTest {
 	private LSP lsp;

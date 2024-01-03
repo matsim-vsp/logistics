@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.Test;
 import org.matsim.testcases.MatsimTestUtils;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Kai Martins-Turner (kturner)

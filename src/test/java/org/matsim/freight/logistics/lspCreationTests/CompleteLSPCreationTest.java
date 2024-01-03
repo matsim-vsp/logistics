@@ -42,7 +42,7 @@ import org.matsim.vehicles.VehicleType;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class CompleteLSPCreationTest {

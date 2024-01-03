@@ -37,7 +37,7 @@ import org.matsim.freight.carriers.TimeWindow;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CompleteShipmentBuilderTest {
 

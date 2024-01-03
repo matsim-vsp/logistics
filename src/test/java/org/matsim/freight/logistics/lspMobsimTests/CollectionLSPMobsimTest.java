@@ -52,10 +52,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
+import static org.junit.jupiter.api.Assertions.*;
 import static org.matsim.freight.logistics.resourceImplementations.ResourceImplementationUtils.createDefaultSimpleForwardLogisticChainScheduler;
 import static org.matsim.freight.logistics.resourceImplementations.ResourceImplementationUtils.createSingleLogisticChainShipmentAssigner;
-import static org.junit.Assert.*;
 
 public class CollectionLSPMobsimTest {
 

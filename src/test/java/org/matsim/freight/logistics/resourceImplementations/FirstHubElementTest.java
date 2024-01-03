@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FirstHubElementTest {
 

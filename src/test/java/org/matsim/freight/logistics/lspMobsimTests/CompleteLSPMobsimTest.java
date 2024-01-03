@@ -52,7 +52,7 @@ import org.matsim.vehicles.VehicleType;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CompleteLSPMobsimTest {
 

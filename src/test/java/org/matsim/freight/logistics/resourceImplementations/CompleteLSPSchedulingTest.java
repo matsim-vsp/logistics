@@ -56,7 +56,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CompleteLSPSchedulingTest {
 
