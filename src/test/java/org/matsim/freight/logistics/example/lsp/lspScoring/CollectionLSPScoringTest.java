@@ -46,6 +46,7 @@ import org.matsim.vehicles.VehicleType;
 
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.matsim.freight.logistics.resourceImplementations.ResourceImplementationUtils.createDefaultSimpleForwardLogisticChainScheduler;
 import static org.matsim.freight.logistics.resourceImplementations.ResourceImplementationUtils.createSingleLogisticChainShipmentAssigner;
 
