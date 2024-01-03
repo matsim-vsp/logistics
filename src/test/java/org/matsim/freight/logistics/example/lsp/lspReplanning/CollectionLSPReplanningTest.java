@@ -27,7 +27,7 @@ import org.matsim.freight.logistics.resourceImplementations.ResourceImplementati
 import org.matsim.freight.logistics.resourceImplementations.collectionCarrier.CollectionCarrierUtils;
 import org.matsim.freight.logistics.shipment.LSPShipment;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
@@ -63,7 +63,7 @@ public class CollectionLSPReplanningTest {
 
 	private LSP collectionLSP;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 
 		Config config = new Config();

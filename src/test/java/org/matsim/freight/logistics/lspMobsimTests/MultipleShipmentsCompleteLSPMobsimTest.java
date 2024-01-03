@@ -32,7 +32,7 @@ import org.matsim.freight.logistics.shipment.ShipmentPlanElement;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
@@ -72,7 +72,7 @@ public class MultipleShipmentsCompleteLSPMobsimTest {
 	private static final Logger log = LogManager.getLogger(MultipleShipmentsCompleteLSPMobsimTest.class);
 	private LSP completeLSP;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 		Config config = new Config();
 		config.addCoreModules();

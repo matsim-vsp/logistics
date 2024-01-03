@@ -22,7 +22,7 @@ package org.matsim.freight.logistics.adapterTests;
 
 import org.matsim.freight.logistics.LSPCarrierResource;
 import org.matsim.freight.logistics.resourceImplementations.collectionCarrier.CollectionCarrierUtils;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -53,7 +53,7 @@ public class CollectionResourceTest {
 	private Id<Link> collectionLinkId;
 	private CarrierCapabilities capabilities;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 		Config config = new Config();
 		config.addCoreModules();

@@ -27,7 +27,7 @@ import org.matsim.freight.logistics.resourceImplementations.collectionCarrier.Co
 import org.matsim.freight.logistics.shipment.LSPShipment;
 import org.matsim.freight.logistics.shipment.ShipmentPlanElement;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -54,7 +54,7 @@ public class MultipleShipmentsCollectionLSPSchedulingTest {
 	private LSPResource collectionResource;
 	private LogisticChainElement collectionElement;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 
 		Config config = new Config();

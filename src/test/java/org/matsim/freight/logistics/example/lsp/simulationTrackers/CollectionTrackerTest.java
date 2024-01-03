@@ -27,7 +27,7 @@ import org.matsim.freight.logistics.shipment.LSPShipment;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
@@ -68,7 +68,7 @@ public class CollectionTrackerTest {
 	private LogisticChain logisticChain;
 	private double shareOfFixedCosts;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 
 		Config config = new Config();

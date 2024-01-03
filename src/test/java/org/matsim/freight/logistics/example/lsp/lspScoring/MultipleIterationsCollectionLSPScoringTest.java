@@ -20,13 +20,13 @@
 
 package org.matsim.freight.logistics.example.lsp.lspScoring;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.matsim.freight.logistics.*;
 import org.matsim.freight.logistics.example.lsp.lspScoring.ExampleLSPScoring;
 import org.matsim.freight.logistics.resourceImplementations.ResourceImplementationUtils;
 import org.matsim.freight.logistics.resourceImplementations.collectionCarrier.CollectionCarrierUtils;
 import org.matsim.freight.logistics.shipment.LSPShipment;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
@@ -63,7 +63,7 @@ public class MultipleIterationsCollectionLSPScoringTest {
 	private final int numberOfShipments = 25;
 	private LSP collectionLSP;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 
 		Config config = new Config();

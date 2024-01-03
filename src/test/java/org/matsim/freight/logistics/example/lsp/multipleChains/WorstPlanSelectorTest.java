@@ -5,7 +5,7 @@ import org.matsim.freight.logistics.resourceImplementations.ResourceImplementati
 import org.matsim.freight.logistics.resourceImplementations.distributionCarrier.DistributionCarrierUtils;
 import org.matsim.freight.logistics.shipment.LSPShipment;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
@@ -63,7 +63,7 @@ public class WorstPlanSelectorTest {
 			.setCostPerTimeUnit(0.01)
 			.build();
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 
 		Config config = prepareConfig();

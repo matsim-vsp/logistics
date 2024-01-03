@@ -25,7 +25,7 @@ import org.matsim.freight.logistics.LSPUtils;
 import org.matsim.freight.logistics.LogisticChain;
 import org.matsim.freight.logistics.LogisticChainElement;
 import org.matsim.freight.logistics.resourceImplementations.collectionCarrier.CollectionCarrierUtils;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -46,7 +46,7 @@ public class CollectionChainTest {
 
 	private LogisticChain logisticChain;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 		Config config = new Config();
 		config.addCoreModules();

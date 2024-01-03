@@ -30,7 +30,7 @@ import org.matsim.freight.logistics.resourceImplementations.transshipmentHub.Tra
 import org.matsim.freight.logistics.shipment.LSPShipment;
 import org.matsim.freight.logistics.shipment.ShipmentPlanElement;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
@@ -69,7 +69,7 @@ public class MultipleIterationsCompleteLSPMobsimTest {
 	public final MatsimTestUtils utils = new MatsimTestUtils();
 	private LSP completeLSP;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 		Config config = new Config();
 		config.addCoreModules();

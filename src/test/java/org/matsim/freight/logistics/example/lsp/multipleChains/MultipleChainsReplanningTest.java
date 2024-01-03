@@ -10,7 +10,7 @@ import org.matsim.freight.logistics.resourceImplementations.distributionCarrier.
 import org.matsim.freight.logistics.shipment.LSPShipment;
 import org.matsim.freight.logistics.shipment.ShipmentPlan;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
@@ -65,7 +65,7 @@ public class MultipleChainsReplanningTest {
 	int innovatedPlanFirstLogisticChainShipmentCount;
 	boolean innovatedPlanHasEmptyShipmentPlanElements = false;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 
 		Config config = prepareConfig();

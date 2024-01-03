@@ -25,7 +25,7 @@ import org.matsim.freight.logistics.LSPUtils;
 import org.matsim.freight.logistics.LogisticChainElement;
 import org.matsim.freight.logistics.resourceImplementations.transshipmentHub.TranshipmentHubUtils;
 import org.matsim.freight.logistics.resourceImplementations.transshipmentHub.TransshipmentHubResource;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.matsim.api.core.v01.Id;
 
@@ -36,7 +36,7 @@ public class FirstHubElementTest {
 	private TransshipmentHubResource point;
 	private LogisticChainElement reloadingElement;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 		TranshipmentHubUtils.TranshipmentHubSchedulerBuilder schedulerBuilder = TranshipmentHubUtils.TranshipmentHubSchedulerBuilder.newInstance();
 		schedulerBuilder.setCapacityNeedFixed(10);

@@ -24,7 +24,7 @@ import org.matsim.freight.logistics.LSPCarrierResource;
 import org.matsim.freight.logistics.LSPResource;
 import org.matsim.freight.logistics.resourceImplementations.transshipmentHub.TranshipmentHubUtils;
 import org.matsim.freight.logistics.resourceImplementations.transshipmentHub.TransshipmentHubResource;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -37,7 +37,7 @@ public class FirstReloadResourceTest {
 	private static final Id<Link> hubLinkId = Id.createLinkId("(4 2) (4 3)");
 	private TransshipmentHubResource transshipmentHubResource;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 
 

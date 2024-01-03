@@ -23,7 +23,7 @@ package org.matsim.freight.logistics.lspPlanTests;
 import org.matsim.freight.logistics.*;
 import org.matsim.freight.logistics.resourceImplementations.ResourceImplementationUtils;
 import org.matsim.freight.logistics.resourceImplementations.collectionCarrier.CollectionCarrierUtils;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -44,7 +44,7 @@ public class CollectionLSPPlanTest {
 	private ShipmentAssigner assigner;
 	private LSPPlan collectionPlan;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 
 		Config config = new Config();

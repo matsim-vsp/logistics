@@ -29,7 +29,7 @@ import org.matsim.freight.logistics.resourceImplementations.transshipmentHub.Tra
 import org.matsim.freight.logistics.shipment.LSPShipment;
 import org.matsim.freight.logistics.shipment.ShipmentPlanElement;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
@@ -69,7 +69,7 @@ public class MultipleIterationsFirstAndSecondReloadLSPMobsimTest {
 	public final MatsimTestUtils utils = new MatsimTestUtils();
 	private LSP lsp;
 
-	@Before
+	@BeforeEach
 	public void initialize() {
 		//Todo/Fixme: In the result there only the second hub is used. -- see Issue #170.  KMT Nov'23
 		Config config = new Config();
