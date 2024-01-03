@@ -27,7 +27,7 @@ import org.matsim.freight.logistics.resourceImplementations.collectionCarrier.Co
 import org.matsim.freight.logistics.shipment.LSPShipment;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -57,7 +57,7 @@ import static org.junit.Assert.assertTrue;
 
 public class MultipleIterationsCollectionLSPScoringTest {
 
-	@Rule
+	@RegisterExtension
 	public final MatsimTestUtils utils = new MatsimTestUtils();
 
 	private final int numberOfShipments = 25;

@@ -20,6 +20,7 @@
 
 package org.matsim.freight.logistics.lspMobsimTests;
 
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.freight.logistics.*;
 import org.matsim.freight.logistics.resourceImplementations.ResourceImplementationUtils;
 import org.matsim.freight.logistics.resourceImplementations.collectionCarrier.CollectionCarrierUtils;
@@ -30,7 +31,6 @@ import org.matsim.freight.logistics.shipment.LSPShipment;
 import org.matsim.freight.logistics.shipment.ShipmentPlanElement;
 import org.matsim.freight.logistics.shipment.ShipmentUtils;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -56,7 +56,7 @@ import static org.junit.Assert.*;
 
 public class CompleteLSPMobsimTest {
 
-	@Rule
+	@RegisterExtension
 	public final MatsimTestUtils utils = new MatsimTestUtils();
 	private LSP completeLSP;
 

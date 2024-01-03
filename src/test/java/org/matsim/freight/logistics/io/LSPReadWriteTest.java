@@ -1,7 +1,7 @@
 package org.matsim.freight.logistics.io;
 
 import org.matsim.freight.logistics.LSPs;
-import org.junit.Rule;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.Test;
 import org.matsim.freight.carriers.CarrierPlanXmlReader;
 import org.matsim.freight.carriers.CarrierVehicleTypeReader;
@@ -13,7 +13,7 @@ import java.util.Collections;
 
 public class LSPReadWriteTest {
 
-	@Rule
+	@RegisterExtension
 	public MatsimTestUtils utils = new MatsimTestUtils();
 
 	@Test

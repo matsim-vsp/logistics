@@ -33,7 +33,7 @@ import org.matsim.freight.logistics.shipment.ShipmentUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -67,7 +67,7 @@ import static org.junit.Assert.*;
 
 public class MultipleShipmentsCompleteLSPMobsimTest {
 	
-	@Rule
+	@RegisterExtension
 	public final MatsimTestUtils utils = new MatsimTestUtils();
 	private static final Logger log = LogManager.getLogger(MultipleShipmentsCompleteLSPMobsimTest.class);
 	private LSP completeLSP;
