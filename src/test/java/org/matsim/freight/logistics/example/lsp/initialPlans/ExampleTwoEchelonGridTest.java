@@ -22,8 +22,8 @@ package org.matsim.freight.logistics.example.lsp.initialPlans;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.Test;
 import org.matsim.testcases.MatsimTestUtils;
 
 import static org.junit.jupiter.api.Assertions.fail;

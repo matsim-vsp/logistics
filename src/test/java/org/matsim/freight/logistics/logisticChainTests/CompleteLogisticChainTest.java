@@ -29,7 +29,7 @@ import org.matsim.freight.logistics.resourceImplementations.distributionCarrier.
 import org.matsim.freight.logistics.resourceImplementations.mainRunCarrier.MainRunCarrierUtils;
 import org.matsim.freight.logistics.resourceImplementations.transshipmentHub.TranshipmentHubUtils;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
