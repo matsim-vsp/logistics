@@ -1,8 +1,11 @@
-[![GithubActionsCI_maven](https://github.com/matsim-vsp/logistics/actions/workflows/GithubActionsCI_maven.yml/badge.svg?branch=main)](https://github.com/matsim-vsp/logistics/actions/workflows/GithubActionsCI_maven.yml)
+# This Repo is no longer maintained
+**The code is merged as own 'logistics' package  in the freight contrib of matsim-libs (https://github.com/matsim-org/matsim-libs/tree/master/contribs/freight).**
+Any further changes will be done there
+This code of this repo will be set to read-only.
 
-# Logistics Service Provider (LSP) 
+KMT 28. Nov 2024
+
+### Logistics Service Provider (LSP) 
 
 This code deals with creating logitics chains for good transport. 
 It is based on work in the dfg-freight project.
-
-For further development and in preparartion of maybe getting a contrib later, this part is extracted from the project repo (https://github.com/matsim-vsp/freight-dfg17) (May 22, kmt)
